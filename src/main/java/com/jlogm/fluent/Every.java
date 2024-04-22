@@ -1,8 +1,8 @@
 package com.jlogm.fluent;
 
+import com.jlogm.Registry;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.factory.LoggerFactory.Registries;
-import com.jlogm.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;

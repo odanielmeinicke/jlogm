@@ -1,6 +1,5 @@
 package com.jlogm;
 
-import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;

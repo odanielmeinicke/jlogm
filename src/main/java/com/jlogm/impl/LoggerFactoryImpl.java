@@ -30,7 +30,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
 
     public static final @NotNull Level INFO = Level.create("INFO", new Color(160, 160, 160));
     public static final @NotNull Level SEVERE = Level.create("SEVERE", new Color(220, 0, 0));
-    public static final @NotNull Level WARNING = Level.create("WARNING", new Color(255, 255, 0));
+    public static final @NotNull Level WARNING = Level.create("WARN", new Color(255, 255, 0));
     public static final @NotNull Level DEBUG = Level.create("DEBUG", new Color(230, 150, 175));
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -169,7 +169,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
 
                             for (int index = 0; index < parts.length; index++) {
                                 @NotNull String part = parts[index];
-                                @NotNull String color = Colors.reset();
+                                @Nullable String color = null;
 
                                 if (colors.containsKey(part.toLowerCase())) {
                                     color = Colors.colored(colors.get(part.toLowerCase()));
@@ -177,9 +177,9 @@ final class LoggerFactoryImpl implements LoggerFactory {
                                     color = color + Colors.underlined();
                                 }
 
-                                content.append(color)
+                                content.append(color != null ? color : "")
                                         .append(part)
-                                        .append(reset());
+                                        .append(color != null ? reset() : "");
 
                                 if (index + 1 != parts.length) {
                                     content.append(" ");
@@ -191,6 +191,8 @@ final class LoggerFactoryImpl implements LoggerFactory {
                         // Date
                         @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM hh:mm:ss.S");
                         @NotNull String date = format.format(new Date(getDate().toEpochMilli()));
+                        date = String.format("%-" + 21 + "s", date);
+
                         // Source
                         @NotNull String[] sources = origin.getClassName().split("\\.");
                         @NotNull String source = sources[sources.length - 1] + (origin.getLineNumber() >= 0 ? ":" + origin.getLineNumber() : "");

@@ -23,8 +23,8 @@ public interface Logger extends Serializable {
         @NotNull String name = "SEVERE";
         return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
     }
-    static @NotNull Logger warning() {
-        @NotNull String name = "WARNING";
+    static @NotNull Logger warn() {
+        @NotNull String name = "WARN";
         return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
     }
     static @NotNull Logger debug() {

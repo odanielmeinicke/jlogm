@@ -31,6 +31,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
     public static final @NotNull Level INFO = Level.create("INFO", new Color(160, 160, 160));
     public static final @NotNull Level SEVERE = Level.create("SEVERE", new Color(220, 0, 0));
     public static final @NotNull Level WARNING = Level.create("WARNING", new Color(255, 255, 0));
+    public static final @NotNull Level DEBUG = Level.create("DEBUG", new Color(230, 150, 175));
 
     @SuppressWarnings("FieldMayBeFinal")
     private static @NotNull LoggerFactory instance = new LoggerFactoryImpl();
@@ -239,6 +240,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
             levels.add(INFO);
             levels.add(SEVERE);
             levels.add(WARNING);
+            levels.add(DEBUG);
         }
 
         @Override

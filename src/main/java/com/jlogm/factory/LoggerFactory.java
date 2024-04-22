@@ -43,19 +43,6 @@ public interface LoggerFactory {
         }
     }
 
-    static @NotNull Logger info() {
-        @NotNull String name = "INFO";
-        return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
-    }
-    static @NotNull Logger severe() {
-        @NotNull String name = "SEVERE";
-        return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
-    }
-    static @NotNull Logger warning() {
-        @NotNull String name = "WARNING";
-        return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
-    }
-
     // Object
 
     /**

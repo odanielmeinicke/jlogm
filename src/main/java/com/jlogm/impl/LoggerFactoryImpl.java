@@ -122,12 +122,9 @@ final class LoggerFactoryImpl implements LoggerFactory {
                         // Message
                         @NotNull StringBuilder content = new StringBuilder();
 
-                        @NotNull Predicate<String> url = new Predicate<String>() {
-                            @Override
-                            public boolean test(@NotNull String string) {
-                                @NotNull Pattern pattern = Pattern.compile("^(http(s?)://)?(((www\\.)?[a-zA-Z0-9.\\-_]+(\\.[a-zA-Z]{2,3})+)|(\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b))(/[a-zA-Z0-9_\\-\\s./?%#&=]*)?$");
-                                return pattern.matcher(string).find();
-                            }
+                        @NotNull Predicate<String> url = string -> {
+                            @NotNull Pattern pattern = Pattern.compile("^(http(s?)://)?(((www\\.)?[a-zA-Z0-9.\\-_]+(\\.[a-zA-Z]{2,3})+)|(\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b))(/[a-zA-Z0-9_\\-\\s./?%#&=]*)?$");
+                            return pattern.matcher(string).find();
                         };
                         @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
                             @NotNull StackTraceElement[] traces = throwable.getStackTrace();
@@ -138,6 +135,29 @@ final class LoggerFactoryImpl implements LoggerFactory {
                             return traces;
                         };
 
+                        // Content
+                        if (object != null) {
+                            @NotNull String[] parts = object.toString().split(" ");
+
+                            for (int index = 0; index < parts.length; index++) {
+                                @NotNull String part = parts[index];
+                                @Nullable String color = null;
+
+                                if (colors.containsKey(part.toLowerCase())) {
+                                    color = Colors.colored(colors.get(part.toLowerCase()));
+                                } if (url.test(part)) {
+                                    color = color + Colors.underlined();
+                                }
+
+                                content.append(color != null ? color : "")
+                                        .append(part)
+                                        .append(color != null ? reset() : "");
+
+                                if (index + 1 != parts.length) {
+                                    content.append(" ");
+                                }
+                            }
+                        }
                         if (throwable != null) {
                             @NotNull StackTraceElement[] traces = traceFilter.apply(throwable.getStackTrace());
 
@@ -162,30 +182,6 @@ final class LoggerFactoryImpl implements LoggerFactory {
 
                                 recurring = recurring.getCause();
                             }
-                        }
-
-                        if (object != null) {
-                            @NotNull String[] parts = object.toString().split(" ");
-
-                            for (int index = 0; index < parts.length; index++) {
-                                @NotNull String part = parts[index];
-                                @Nullable String color = null;
-
-                                if (colors.containsKey(part.toLowerCase())) {
-                                    color = Colors.colored(colors.get(part.toLowerCase()));
-                                } if (url.test(part)) {
-                                    color = color + Colors.underlined();
-                                }
-
-                                content.append(color != null ? color : "")
-                                        .append(part)
-                                        .append(color != null ? reset() : "");
-
-                                if (index + 1 != parts.length) {
-                                    content.append(" ");
-                                }
-                            }
-
                         }
 
                         // Date

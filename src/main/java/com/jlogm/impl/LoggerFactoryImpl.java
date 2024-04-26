@@ -161,7 +161,10 @@ final class LoggerFactoryImpl implements LoggerFactory {
                         if (throwable != null) {
                             @NotNull StackTraceElement[] traces = traceFilter.apply(throwable.getStackTrace());
 
-                            content.append(System.lineSeparator());
+                            if (object != null) {
+                                content.append(System.lineSeparator());
+                            }
+
                             content.append(throwable.getClass().getName()).append(": ").append(throwable.getMessage()).append(System.lineSeparator());
 
                             for (int index = 0; index < traces.length; index++) {
@@ -173,6 +176,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
                             while (recurring != null) {
                                 traces = traceFilter.apply(recurring.getStackTrace());
 
+                                content.append(System.lineSeparator());
                                 content.append("Caused by ").append(recurring.getClass().getName()).append(": ").append(recurring.getMessage()).append(System.lineSeparator());
 
                                 for (int index = 0; index < traces.length; index++) {

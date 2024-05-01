@@ -47,6 +47,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
         put("localhost", new Color(0, 180, 255));
         put("127.0.0.1", new Color(0, 180, 255));
         put("running", new Color(0, 180, 255));
+        put("loaded", new Color(0, 180, 255));
 
         put("successfully", new Color(0, 180, 0));
         put("connected", new Color(0, 180, 0));
@@ -137,7 +138,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
 
                         // Content
                         if (object != null) {
-                            @NotNull String[] parts = object.toString().split(" ");
+                            @NotNull String[] parts = object.toString().replace("\r", "").split(" ");
 
                             for (int index = 0; index < parts.length; index++) {
                                 @NotNull String part = parts[index];
@@ -165,7 +166,8 @@ final class LoggerFactoryImpl implements LoggerFactory {
                                 content.append(System.lineSeparator());
                             }
 
-                            content.append(throwable.getClass().getName()).append(": ").append(throwable.getMessage()).append(System.lineSeparator());
+                            @Nullable String message = throwable.getMessage() != null ? throwable.getMessage().replace("\r", "") : null;
+                            content.append(throwable.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
 
                             for (int index = 0; index < traces.length; index++) {
                                 if (index > 0) content.append(System.lineSeparator());
@@ -177,7 +179,9 @@ final class LoggerFactoryImpl implements LoggerFactory {
                                 traces = traceFilter.apply(recurring.getStackTrace());
 
                                 content.append(System.lineSeparator());
-                                content.append("Caused by ").append(recurring.getClass().getName()).append(": ").append(recurring.getMessage()).append(System.lineSeparator());
+
+                                message = recurring.getMessage() != null ? recurring.getMessage().replace("\r", "") : null;
+                                content.append("Caused by ").append(recurring.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
 
                                 for (int index = 0; index < traces.length; index++) {
                                     if (index > 0) content.append(System.lineSeparator());

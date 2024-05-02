@@ -66,6 +66,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
         put("stopping", Color.ORANGE);
         put("disabling", Color.ORANGE);
 
+        put("disconnected", SEVERE.getColor());
         put("error", SEVERE.getColor());
         put("failed", SEVERE.getColor());
         put("fail", SEVERE.getColor());
@@ -81,10 +82,19 @@ final class LoggerFactoryImpl implements LoggerFactory {
     private final @NotNull Filters filters = new FiltersImpl();
     private @Nullable Registries registries = new RegistriesImpl();
 
+    private boolean colored = true;
+
     LoggerFactoryImpl() {
     }
 
     // Getters
+
+    public boolean isColored() {
+        return colored;
+    }
+    public void setColored(boolean colored) {
+        this.colored = colored;
+    }
 
     @Override
     public @NotNull Levels getLevels() {
@@ -143,10 +153,12 @@ final class LoggerFactoryImpl implements LoggerFactory {
                                 @NotNull String part = parts[index];
                                 @Nullable String color = null;
 
-                                if (colors.containsKey(part.toLowerCase())) {
-                                    color = Colors.colored(colors.get(part.toLowerCase()));
-                                } if (url.test(part)) {
-                                    color = color + Colors.underlined();
+                                if (isColored()) {
+                                    if (colors.containsKey(part.toLowerCase())) {
+                                        color = Colors.colored(colors.get(part.toLowerCase()));
+                                    } if (url.test(part)) {
+                                        color = color + Colors.underlined();
+                                    }
                                 }
 
                                 content.append(color != null ? color : "")

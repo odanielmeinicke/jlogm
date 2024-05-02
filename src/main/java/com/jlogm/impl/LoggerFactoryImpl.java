@@ -128,12 +128,11 @@ final class LoggerFactoryImpl implements LoggerFactory {
                             return pattern.matcher(string).find();
                         };
                         @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
-                            @NotNull StackTraceElement[] traces = throwable.getStackTrace();
                             for (@NotNull StackFilter filter : filters) {
-                                traces = filter.format(traces);
+                                elements = filter.format(elements);
                             }
 
-                            return traces;
+                            return elements;
                         };
 
                         // Content

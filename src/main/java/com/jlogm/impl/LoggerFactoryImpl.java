@@ -204,7 +204,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
                         }
 
                         // Date
-                        @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM hh:mm:ss.S");
+                        @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM HH:mm:ss.S");
                         @NotNull String date = format.format(new Date(getDate().toEpochMilli()));
                         date = String.format("%-" + 21 + "s", date);
 

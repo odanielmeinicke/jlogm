@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Range;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 public interface Every {
 
@@ -36,6 +37,11 @@ public interface Every {
             public boolean equals(@Nullable Object obj) {
                 return super.equals(obj) || obj instanceof Every;
             }
+            @Override
+            public int hashCode() {
+                return Objects.hash("period", duration);
+            }
+
         };
     }
     static @NotNull Every times(@Range(from = 0, to = Integer.MAX_VALUE) int number) {
@@ -54,6 +60,10 @@ public interface Every {
             @Override
             public boolean equals(@Nullable Object obj) {
                 return super.equals(obj) || obj instanceof Every;
+            }
+            @Override
+            public int hashCode() {
+                return Objects.hash("times", number);
             }
         };
     }

@@ -4,6 +4,7 @@ import com.jlogm.Filter;
 import com.jlogm.Level;
 import com.jlogm.Logger;
 import com.jlogm.Registry;
+import com.jlogm.factory.Configuration;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;
@@ -121,11 +122,11 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
     }
 
     @Override
-    public @NotNull Logger create(@NotNull Level level) {
+    public @NotNull Logger create(@NotNull String name, @NotNull Level level) {
         @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(1).filter(trace -> !trace.getClassName().startsWith("com.jlogm")).findFirst().orElseThrow(IllegalStateException::new);
         @NotNull LogOrigin origin = LogOrigin.create(element.getClassName(), element.getFileName(), element.getMethodName(), element.getLineNumber());
 
-        return new LoggerImpl(this, level, origin) {
+        return new LoggerImpl(name, level, origin) {
             @Override
             public @NotNull Registry log(@Nullable Object object) {
                 final @NotNull Instant instant = Instant.now();
@@ -218,7 +219,7 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
                     }
                 };
 
-                if (getFilters().isSuppressed(registry)) {
+                if (LoggerFactoryImpl.this.getFilters().isSuppressed(registry)) {
                     registry.setSuppressed(true);
                 } else if (every != null && !every.canLog(LoggerFactoryImpl.this, registry)) {
                     registry.setSuppressed(true);
@@ -233,6 +234,11 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
                 return registry;
             }
         };
+    }
+
+    @Override
+    public @NotNull Configuration getConfiguration(@NotNull Logger logger) {
+        return null;
     }
 
     // SLF4J

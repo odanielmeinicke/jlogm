@@ -38,7 +38,13 @@ public interface Logger extends Serializable {
 
     // Object
 
+    @NotNull String getName();
+
     @NotNull Level getLevel();
+    @NotNull LogOrigin getOrigin();
+    @Nullable Every getEvery();
+    @Nullable Throwable getCause();
+    @NotNull StackFilter @Nullable [] getStackFilters();
 
     @Contract("_ -> this")
     @NotNull Logger withOrigin(@NotNull LogOrigin origin);

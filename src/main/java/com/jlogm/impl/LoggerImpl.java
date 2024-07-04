@@ -15,7 +15,7 @@ import java.util.Objects;
 
 abstract class LoggerImpl implements Logger {
 
-    private final transient @NotNull LoggerFactoryImpl factory;
+    private final @NotNull String name;
     private final @NotNull Level level;
 
     public boolean thrown = false;
@@ -28,20 +28,40 @@ abstract class LoggerImpl implements Logger {
     public @UnknownNullability Every every;
     public @NotNull LogOrigin origin;
 
-    LoggerImpl(@NotNull LoggerFactoryImpl factory, @NotNull Level level, @NotNull LogOrigin origin) {
-        this.factory = factory;
+    LoggerImpl(@NotNull String name, @NotNull Level level, @NotNull LogOrigin origin) {
+        this.name = name;
         this.level = level;
         this.origin = origin;
     }
 
     // Getters
 
-    public final @NotNull LoggerFactoryImpl getFactory() {
-        return factory;
+    @Override
+    public @NotNull String getName() {
+        return name;
     }
+
     @Override
     public final @NotNull Level getLevel() {
         return level;
+    }
+
+    @Override
+    public @Nullable Throwable getCause() {
+        return throwable;
+    }
+    @Override
+    public @NotNull StackFilter @Nullable [] getStackFilters() {
+        return filters;
+    }
+    @Override
+    public @Nullable Every getEvery() {
+        return every;
+    }
+
+    @Override
+    public @NotNull LogOrigin getOrigin() {
+        return origin;
     }
 
     @Override
@@ -92,11 +112,11 @@ abstract class LoggerImpl implements Logger {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         LoggerImpl logger = (LoggerImpl) object;
-        return Objects.equals(getFactory(), logger.getFactory()) && Objects.equals(getLevel(), logger.getLevel()) && Objects.equals(throwable, logger.throwable) && Objects.deepEquals(filters, logger.filters) && Objects.equals(every, logger.every);
+        return Objects.equals(getLevel(), logger.getLevel()) && Objects.equals(throwable, logger.throwable) && Objects.deepEquals(filters, logger.filters) && Objects.equals(every, logger.every);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(getFactory(), getLevel(), throwable, (Integer) Arrays.hashCode(filters), every);
+        return Objects.hash(getLevel(), throwable, Arrays.hashCode(filters), every);
     }
 
 }

@@ -81,10 +81,19 @@ public interface LoggerFactory {
     /**
      * Creates a logger using a specific level.
      *
+     * @param name The name to be associated with the logger.
      * @param level The level to be associated with the logger.
      * @return A new Logger instance with the specified level.
      */
-    @NotNull Logger create(@NotNull Level level);
+    @NotNull Logger create(@NotNull String name, @NotNull Level level);
+
+    /**
+     * Returns the specific configuration for this logger
+     *
+     * @param logger the logger
+     * @return the logging configuration, must not be null.
+     */
+    @NotNull Configuration getConfiguration(@NotNull Logger logger);
 
     // Classes
 

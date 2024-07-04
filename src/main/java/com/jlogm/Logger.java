@@ -15,6 +15,10 @@ public interface Logger extends Serializable {
 
     // Static initializers
 
+    static @NotNull Logger trace() {
+        @NotNull String name = "TRACE";
+        return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));
+    }
     static @NotNull Logger info() {
         @NotNull String name = "INFO";
         return getInstance().create(getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("the current logger factory doesn't have a '" + name + "' level")));

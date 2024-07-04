@@ -60,7 +60,7 @@ public interface LoggerFactory {
     @NotNull Filters getFilters();
 
     /**
-     * The list of registries where all the log entries sent using this logger factory are stored.
+     * The list of registries where all the log entries sent using this logger factory is stored.
      * <p>
      * If the list of registries is null, the logger factory will not store any of the sent log entries.
      *

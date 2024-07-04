@@ -10,6 +10,7 @@ import com.jlogm.fluent.StackFilter;
 import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.ILoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
@@ -24,13 +25,14 @@ import java.util.stream.Stream;
 
 import static com.jlogm.utils.Colors.*;
 
-final class LoggerFactoryImpl implements LoggerFactory {
+final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
 
     // Static initializers
 
+    public static final @NotNull Level TRACE = Level.create("TRACE", new Color(123, 123, 123));
     public static final @NotNull Level INFO = Level.create("INFO", new Color(160, 160, 160));
     public static final @NotNull Level SEVERE = Level.create("SEVERE", new Color(220, 0, 0));
-    public static final @NotNull Level WARNING = Level.create("WARN", new Color(255, 255, 0));
+    public static final @NotNull Level WARN = Level.create("WARN", new Color(255, 255, 0));
     public static final @NotNull Level DEBUG = Level.create("DEBUG", new Color(230, 150, 175));
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -120,7 +122,7 @@ final class LoggerFactoryImpl implements LoggerFactory {
 
     @Override
     public @NotNull Logger create(@NotNull Level level) {
-        @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(3).findFirst().orElseThrow(IllegalStateException::new);
+        @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(1).filter(trace -> !trace.getClassName().startsWith("com.jlogm")).findFirst().orElseThrow(IllegalStateException::new);
         @NotNull LogOrigin origin = LogOrigin.create(element.getClassName(), element.getFileName(), element.getMethodName(), element.getLineNumber());
 
         return new LoggerImpl(this, level, origin) {
@@ -233,7 +235,17 @@ final class LoggerFactoryImpl implements LoggerFactory {
         };
     }
 
-    // Natives
+    // SLF4J
+
+    @Override
+    public @NotNull org.slf4j.Logger getLogger(@NotNull String name) {
+        @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(3).findFirst().orElseThrow(IllegalStateException::new);
+        @NotNull LogOrigin origin = LogOrigin.create(element.getClassName(), element.getFileName(), element.getMethodName(), element.getLineNumber());
+
+        return new Slf4jLoggerImpl(name, origin);
+    }
+
+    // Implementations
 
     @Override
     public boolean equals(Object object) {
@@ -256,8 +268,9 @@ final class LoggerFactoryImpl implements LoggerFactory {
         private LevelsImpl() {
             levels.add(INFO);
             levels.add(SEVERE);
-            levels.add(WARNING);
+            levels.add(WARN);
             levels.add(DEBUG);
+            levels.add(TRACE);
         }
 
         @Override

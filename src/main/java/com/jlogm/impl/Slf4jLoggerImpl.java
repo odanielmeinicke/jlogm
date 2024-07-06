@@ -1,6 +1,7 @@
 package com.jlogm.impl;
 
 import com.jlogm.Logger;
+import com.jlogm.Registry;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.LogOrigin;
 import org.jetbrains.annotations.NotNull;
@@ -302,13 +303,14 @@ public final class Slf4jLoggerImpl implements org.slf4j.Logger, Serializable {
         @NotNull String message = MessageFormatter.basicArrayFormat(messagePattern, arguments);
 
         // Prepare the logger
-        @NotNull Logger logger = factory.create(jlogmlevel);
+        @NotNull Logger logger = factory.create(getName());
+        @NotNull Registry registry = logger.registry(jlogmlevel);
 
         // Exceptions
-        if (throwable != null) logger.withCause(throwable);
+        if (throwable != null) registry.withCause(throwable);
 
         // Perform
-        logger.log(message);
+        registry.log(message);
     }
 
     // Modules

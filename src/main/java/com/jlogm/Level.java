@@ -1,6 +1,8 @@
 package com.jlogm;
 
+import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -15,35 +17,66 @@ public interface Level extends Serializable {
 
     // Static initializers
 
-    static @NotNull Level create(final @NotNull String name, final @NotNull Color color) {
+    static @NotNull Level create(final @NotNull String name) {
         return new Level() {
+
+            // Getters
+
             @Override
             public @NotNull String getName() {
                 return name;
             }
-            @Override
-            public @NotNull Color getColor() {
-                return color;
-            }
+
+            // Implementations
 
             @Override
-            public boolean equals(Object obj) {
-                if (obj instanceof Level) {
-                    @NotNull Level level = (Level) obj;
-                    return level.getName().equalsIgnoreCase(name);
-                }
-
-                return false;
+            public boolean equals(@Nullable Object object) {
+                if (this == object) return true;
+                if (object == null || getClass() != object.getClass()) return false;
+                @NotNull Level that = (Level) object;
+                return Objects.equals(getName(), that.getName());
             }
             @Override
             public int hashCode() {
-                return Objects.hash(getName().toLowerCase());
+                return Objects.hash(getName());
             }
 
             @Override
             public @NotNull String toString() {
                 return getName().toUpperCase();
             }
+
+        };
+    }
+    static @NotNull Level create(final @NotNull String name, final @NotNull Color color) {
+        return new Level() {
+
+            // Getters
+
+            @Override
+            public @NotNull String getName() {
+                return name;
+            }
+
+            // Implementations
+
+            @Override
+            public boolean equals(@Nullable Object object) {
+                if (this == object) return true;
+                if (object == null || getClass() != object.getClass()) return false;
+                @NotNull Level that = (Level) object;
+                return Objects.equals(getName(), that.getName());
+            }
+            @Override
+            public int hashCode() {
+                return Objects.hash(getName());
+            }
+
+            @Override
+            public @NotNull String toString() {
+                return Colors.colored(color, getName().toUpperCase());
+            }
+
         };
     }
 
@@ -57,11 +90,4 @@ public interface Level extends Serializable {
      */
     @NotNull String getName();
 
-    /**
-     * The color that will be used to print this level in the console. Different levels
-     * might use different colors for better visual distinction. For example, an "ERROR"
-     * level might be printed in red while an "INFO" level might be printed in blue.
-     * @return The color for the level.
-     */
-    @NotNull Color getColor();
 }

@@ -4,34 +4,29 @@ import com.jlogm.Level;
 import com.jlogm.Logger;
 import com.jlogm.Registry;
 import com.jlogm.fluent.Every;
-import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Marker;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Objects;
 
-abstract class LoggerImpl implements Logger {
+final class LoggerImpl implements Logger {
 
     private final @NotNull String name;
-    private final @NotNull Level level;
 
-    public boolean thrown = false;
+    private @UnknownNullability Throwable throwable;
 
-    // Exceptions
-    public @UnknownNullability Throwable throwable;
-    public @NotNull StackFilter @UnknownNullability [] filters;
+    private @NotNull StackFilter @NotNull [] stackFilters = new StackFilter[0];
+    private @NotNull Marker @NotNull [] markers = new Marker[0];
 
-    // Others
-    public @UnknownNullability Every every;
-    public @NotNull LogOrigin origin;
+    private @UnknownNullability Every every;
 
-    LoggerImpl(@NotNull String name, @NotNull Level level, @NotNull LogOrigin origin) {
+    LoggerImpl(@NotNull String name) {
         this.name = name;
-        this.level = level;
-        this.origin = origin;
     }
 
     // Getters
@@ -42,81 +37,65 @@ abstract class LoggerImpl implements Logger {
     }
 
     @Override
-    public final @NotNull Level getLevel() {
-        return level;
-    }
-
-    @Override
-    public @Nullable Throwable getCause() {
-        return throwable;
+    public @NotNull Logger every(@NotNull Every every) {
+        this.every = every;
+        return this;
     }
     @Override
-    public @NotNull StackFilter @Nullable [] getStackFilters() {
-        return filters;
-    }
-    @Override
-    public @Nullable Every getEvery() {
+    public @NotNull Every every() {
         return every;
     }
 
     @Override
-    public @NotNull LogOrigin getOrigin() {
-        return origin;
-    }
-
-    @Override
-    public final @NotNull Logger withOrigin(@NotNull LogOrigin origin) {
-        checkThrown();
+    public @NotNull Logger marker(@NotNull Marker @NotNull ... markers) {
+        this.markers = markers;
         return this;
     }
+    @Override
+    public @NotNull Marker @NotNull [] marker() {
+        return this.markers;
+    }
 
     @Override
-    public final @NotNull Logger every(@NotNull Every every) {
-        checkThrown();
-        this.every = every;
+    public @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters) {
+        this.stackFilters = stackFilters;
         return this;
     }
-
     @Override
-    public final @NotNull Logger withCause(@NotNull Throwable throwable) {
-        return Logger.super.withCause(throwable);
+    public @NotNull StackFilter @NotNull [] stackFilters() {
+        return stackFilters;
     }
 
-    @Override
-    public final @NotNull Logger withCause(@NotNull Throwable throwable, @NotNull StackFilter @NotNull ... filters) {
-        checkThrown();
-
-        this.throwable = throwable;
-        this.filters = filters;
-
-        return this;
-    }
+    // Modules
 
     @Override
-    public final @Nullable Registry log() {
-        return log(null);
+    public @NotNull Registry registry(@NotNull Level level) {
+        return new RegistryImpl(level, OffsetDateTime.now(), stackFilters, markers, every);
     }
 
-    // Utilities
-
-    private void checkThrown() {
-        if (thrown) {
-            throw new UnsupportedOperationException("you cannot modify a thrown logger");
-        }
-    }
-
-    // Equals
+    // Implementations
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-        LoggerImpl logger = (LoggerImpl) object;
-        return Objects.equals(getLevel(), logger.getLevel()) && Objects.equals(throwable, logger.throwable) && Objects.deepEquals(filters, logger.filters) && Objects.equals(every, logger.every);
+        @NotNull LoggerImpl logger = (LoggerImpl) object;
+        return Objects.equals(getName(), logger.getName()) && Objects.equals(throwable, logger.throwable) && Objects.deepEquals(stackFilters, logger.stackFilters) && Objects.deepEquals(markers, logger.markers) && Objects.equals(every, logger.every);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(getLevel(), throwable, Arrays.hashCode(filters), every);
+        return Objects.hash(getName(), throwable, Arrays.hashCode(stackFilters), Arrays.hashCode(markers), every);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return "LoggerImpl{" +
+                "name='" + name + '\'' +
+                ", throwable=" + throwable +
+                ", filters=" + Arrays.toString(stackFilters) +
+                ", markers=" + Arrays.toString(markers) +
+                ", every=" + every +
+                '}';
     }
 
 }

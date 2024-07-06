@@ -4,12 +4,12 @@ import com.jlogm.Filter;
 import com.jlogm.Level;
 import com.jlogm.Logger;
 import com.jlogm.Registry;
+import com.jlogm.impl.LoggerFactoryImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -21,26 +21,10 @@ public interface LoggerFactory {
     // Static initializers
 
     static @NotNull LoggerFactory getInstance() {
-        try {
-            @NotNull Class<?> factoryClass = Class.forName("com.jlogm.impl.LoggerFactoryImpl");
-            @NotNull Field instance = factoryClass.getDeclaredField("instance");
-            instance.setAccessible(true);
-
-            return (LoggerFactory) instance.get(null);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-            throw new RuntimeException("cannot retrieve logger factory instance field ", e);
-        }
+        return LoggerFactoryImpl.instance;
     }
     static void setInstance(@NotNull LoggerFactory factory) {
-        try {
-            @NotNull Class<?> factoryClass = Class.forName("com.jlogm.impl.LoggerFactoryImpl");
-            @NotNull Field instance = factoryClass.getDeclaredField("instance");
-            instance.setAccessible(true);
-
-            instance.set(null, factory);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-            throw new RuntimeException("cannot retrieve logger factory instance field ", e);
-        }
+        LoggerFactoryImpl.instance = factory;
     }
 
     // Object
@@ -79,21 +63,12 @@ public interface LoggerFactory {
     // Builders
 
     /**
-     * Creates a logger using a specific level.
+     * Creates a logger using a specific name.
      *
      * @param name The name to be associated with the logger.
-     * @param level The level to be associated with the logger.
-     * @return A new Logger instance with the specified level.
+     * @return A new Logger instance with the specified name.
      */
-    @NotNull Logger create(@NotNull String name, @NotNull Level level);
-
-    /**
-     * Returns the specific configuration for this logger
-     *
-     * @param logger the logger
-     * @return the logging configuration, must not be null.
-     */
-    @NotNull Configuration getConfiguration(@NotNull Logger logger);
+    @NotNull Logger create(@NotNull String name);
 
     // Classes
 

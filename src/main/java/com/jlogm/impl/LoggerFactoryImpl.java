@@ -3,30 +3,19 @@ package com.jlogm.impl;
 import com.jlogm.Filter;
 import com.jlogm.Level;
 import com.jlogm.Logger;
-import com.jlogm.Registry;
-import com.jlogm.factory.Configuration;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.LogOrigin;
-import com.jlogm.fluent.StackFilter;
-import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.List;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.jlogm.utils.Colors.*;
-
-final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
+public final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
 
     // Static initializers
 
@@ -37,47 +26,7 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
     public static final @NotNull Level DEBUG = Level.create("DEBUG", new Color(230, 150, 175));
 
     @SuppressWarnings("FieldMayBeFinal")
-    private static @NotNull LoggerFactory instance = new LoggerFactoryImpl();
-
-    private static final @NotNull Map<String, Color> colors = new HashMap<String, Color>() {{
-        put("loading", new Color(0, 180, 255));
-        put("initializing", new Color(0, 180, 255));
-        put("generating", new Color(0, 180, 255));
-        put("saving", new Color(0, 180, 255));
-        put("enabling", new Color(0, 180, 255));
-        put("uploading", new Color(0, 180, 255));
-        put("importing", new Color(0, 180, 255));
-        put("localhost", new Color(0, 180, 255));
-        put("127.0.0.1", new Color(0, 180, 255));
-        put("running", new Color(0, 180, 255));
-        put("loaded", new Color(0, 180, 255));
-
-        put("successfully", new Color(0, 180, 0));
-        put("connected", new Color(0, 180, 0));
-        put("success", new Color(0, 180, 0));
-        put("initialized", new Color(0, 180, 0));
-        put("saved", new Color(0, 180, 0));
-        put("enabled", new Color(0, 180, 0));
-        put("unloaded", new Color(0, 180, 0));
-        put("uploaded", new Color(0, 180, 0));
-        put("imported", new Color(0, 180, 0));
-        put("done", new Color(0, 180, 0));
-
-        put("warning", Color.YELLOW);
-
-        put("unloading", Color.ORANGE);
-        put("stopping", Color.ORANGE);
-        put("disabling", Color.ORANGE);
-
-        put("disconnected", SEVERE.getColor());
-        put("error", SEVERE.getColor());
-        put("failed", SEVERE.getColor());
-        put("fail", SEVERE.getColor());
-        put("failure", SEVERE.getColor());
-        put("exception", SEVERE.getColor());
-        put("issue", SEVERE.getColor());
-        put("cannot", SEVERE.getColor());
-    }};
+    public static @NotNull LoggerFactory instance = new LoggerFactoryImpl();
 
     // Object
 
@@ -85,19 +34,10 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
     private final @NotNull Filters filters = new FiltersImpl();
     private @Nullable Registries registries = new RegistriesImpl();
 
-    private boolean colored = true;
-
     LoggerFactoryImpl() {
     }
 
     // Getters
-
-    public boolean isColored() {
-        return colored;
-    }
-    public void setColored(boolean colored) {
-        this.colored = colored;
-    }
 
     @Override
     public @NotNull Levels getLevels() {
@@ -122,123 +62,8 @@ final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
     }
 
     @Override
-    public @NotNull Logger create(@NotNull String name, @NotNull Level level) {
-        @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(1).filter(trace -> !trace.getClassName().startsWith("com.jlogm")).findFirst().orElseThrow(IllegalStateException::new);
-        @NotNull LogOrigin origin = LogOrigin.create(element.getClassName(), element.getFileName(), element.getMethodName(), element.getLineNumber());
-
-        return new LoggerImpl(name, level, origin) {
-            @Override
-            public @NotNull Registry log(@Nullable Object object) {
-                final @NotNull Instant instant = Instant.now();
-                final @NotNull RegistryImpl registry = new RegistryImpl(this, instant) {
-                    @Override
-                    public @NotNull String format() {
-                        // Message
-                        @NotNull StringBuilder content = new StringBuilder();
-
-                        @NotNull Predicate<String> url = string -> {
-                            @NotNull Pattern pattern = Pattern.compile("^(http(s?)://)?(((www\\.)?[a-zA-Z0-9.\\-_]+(\\.[a-zA-Z]{2,3})+)|(\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b))(/[a-zA-Z0-9_\\-\\s./?%#&=]*)?$");
-                            return pattern.matcher(string).find();
-                        };
-                        @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
-                            for (@NotNull StackFilter filter : filters) {
-                                elements = filter.format(elements);
-                            }
-
-                            return elements;
-                        };
-
-                        // Content
-                        if (object != null) {
-                            @NotNull String[] parts = object.toString().replace("\r", "").split(" ");
-
-                            for (int index = 0; index < parts.length; index++) {
-                                @NotNull String part = parts[index];
-                                @Nullable String color = null;
-
-                                if (isColored()) {
-                                    if (colors.containsKey(part.toLowerCase())) {
-                                        color = Colors.colored(colors.get(part.toLowerCase()));
-                                    } if (url.test(part)) {
-                                        color = color + Colors.underlined();
-                                    }
-                                }
-
-                                content.append(color != null ? color : "")
-                                        .append(part)
-                                        .append(color != null ? reset() : "");
-
-                                if (index + 1 != parts.length) {
-                                    content.append(" ");
-                                }
-                            }
-                        }
-                        if (throwable != null) {
-                            @NotNull StackTraceElement[] traces = traceFilter.apply(throwable.getStackTrace());
-
-                            if (object != null) {
-                                content.append(System.lineSeparator());
-                            }
-
-                            @Nullable String message = throwable.getMessage() != null ? throwable.getMessage().replace("\r", "") : null;
-                            content.append(throwable.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
-
-                            for (int index = 0; index < traces.length; index++) {
-                                if (index > 0) content.append(System.lineSeparator());
-                                content.append("\tat ").append(traces[index]);
-                            }
-
-                            @Nullable Throwable recurring = throwable.getCause();
-                            while (recurring != null) {
-                                traces = traceFilter.apply(recurring.getStackTrace());
-
-                                content.append(System.lineSeparator());
-
-                                message = recurring.getMessage() != null ? recurring.getMessage().replace("\r", "") : null;
-                                content.append("Caused by ").append(recurring.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
-
-                                for (int index = 0; index < traces.length; index++) {
-                                    if (index > 0) content.append(System.lineSeparator());
-                                    content.append("\tat ").append(traces[index]);
-                                }
-
-                                recurring = recurring.getCause();
-                            }
-                        }
-
-                        // Date
-                        @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM HH:mm:ss.S");
-                        @NotNull String date = format.format(new Date(getDate().toEpochMilli()));
-                        date = String.format("%-" + 21 + "s", date);
-
-                        // Source
-                        @NotNull String[] sources = origin.getClassName().split("\\.");
-                        @NotNull String source = sources[sources.length - 1] + (origin.getLineNumber() >= 0 ? ":" + origin.getLineNumber() : "");
-
-                        return bold(colored(new Color(65, 65, 65), "| ")) + date + " " + colored(level.getColor(), level.getName()) + "  " + source + " - " + content;
-                    }
-                };
-
-                if (LoggerFactoryImpl.this.getFilters().isSuppressed(registry)) {
-                    registry.setSuppressed(true);
-                } else if (every != null && !every.canLog(LoggerFactoryImpl.this, registry)) {
-                    registry.setSuppressed(true);
-                }
-
-                if (getRegistries() != null) {
-                    getRegistries().add(registry);
-                } if (!registry.wasSuppressed()) {
-                    System.out.println(registry);
-                }
-
-                return registry;
-            }
-        };
-    }
-
-    @Override
-    public @NotNull Configuration getConfiguration(@NotNull Logger logger) {
-        return null;
+    public @NotNull Logger create(@NotNull String name) {
+        return new LoggerImpl(name);
     }
 
     // SLF4J

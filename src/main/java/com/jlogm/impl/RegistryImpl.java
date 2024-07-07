@@ -183,6 +183,20 @@ public final class RegistryImpl implements Registry {
 
     @Override
     public void log(@Nullable Object object) {
+        // Filters and suppression
+        this.object = object;
+
+        if (LoggerFactory.getInstance().getFilters().isSuppressed(this)) {
+            setSuppressed(true);
+        } else if (every != null && !every.canLog(LoggerFactory.getInstance(), this)) {
+            setSuppressed(true);
+        }
+
+        @Nullable Registries registries = LoggerFactory.getInstance().getRegistries();
+        if (registries != null) {
+            registries.add(this);
+        }
+
         // Message
         @NotNull StringBuilder content = new StringBuilder();
 
@@ -258,11 +272,11 @@ public final class RegistryImpl implements Registry {
         @NotNull StringBuilder markers = new StringBuilder();
         int row = 0;
         for (@NotNull Marker marker : this.markers) {
-            markers.append(Colors.underlined(marker.toString())).append(" ");
+            markers.append(marker.toString()).append(" ");
 
             for (@NotNull Iterator<Marker> it = marker.iterator(); it.hasNext(); ) {
                 @NotNull Marker children = it.next();
-                markers.append(Colors.underlined(children.toString()));
+                markers.append(children.toString());
                 if (it.hasNext()) markers.append(" ");
             }
 
@@ -281,20 +295,6 @@ public final class RegistryImpl implements Registry {
 
         // Generate message
         @NotNull String message = bold(colored(new Color(65, 65, 65), "| ")) + date + " " + level + "  " + markers + source + " - " + content;
-
-        // Filters and suppression
-        this.object = object;
-
-        if (LoggerFactory.getInstance().getFilters().isSuppressed(this)) {
-            setSuppressed(true);
-        } else if (every != null && !every.canLog(LoggerFactory.getInstance(), this)) {
-            setSuppressed(true);
-        }
-
-        @Nullable Registries registries = LoggerFactory.getInstance().getRegistries();
-        if (registries != null) {
-            registries.add(this);
-        }
 
         // Finish
         if (isSuppressed()) return;

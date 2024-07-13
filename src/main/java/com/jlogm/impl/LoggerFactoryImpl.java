@@ -19,11 +19,21 @@ public final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
 
     // Static initializers
 
-    public static final @NotNull Level TRACE = Level.create("TRACE", new Color(123, 123, 123));
-    public static final @NotNull Level INFO = Level.create("INFO", new Color(160, 160, 160));
-    public static final @NotNull Level SEVERE = Level.create("SEVERE", new Color(220, 0, 0));
-    public static final @NotNull Level WARN = Level.create("WARN", new Color(255, 255, 0));
-    public static final @NotNull Level DEBUG = Level.create("DEBUG", new Color(230, 150, 175));
+    public static @Nullable Color getColor(@NotNull Level level) {
+        if (level.getName().equalsIgnoreCase("TRACE")) {
+            return new Color(123, 123, 123);
+        } else if (level.getName().equalsIgnoreCase("ERROR") || level.getName().equalsIgnoreCase("SEVERE")) {
+            return new Color(220, 0, 0);
+        } else if (level.getName().equalsIgnoreCase("INFO")) {
+            return new Color(160, 160, 160);
+        } else if (level.getName().equalsIgnoreCase("WARN") || level.getName().equalsIgnoreCase("WARNING")) {
+            return new Color(255, 255, 0);
+        } else if (level.getName().equalsIgnoreCase("DEBUG")) {
+            return new Color(230, 150, 175);
+        } else {
+            return null;
+        }
+    }
 
     @SuppressWarnings("FieldMayBeFinal")
     public static @NotNull LoggerFactory instance = new LoggerFactoryImpl();
@@ -97,11 +107,11 @@ public final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
         private final @NotNull Set<Level> levels = new HashSet<>();
 
         private LevelsImpl() {
-            levels.add(INFO);
-            levels.add(SEVERE);
-            levels.add(WARN);
-            levels.add(DEBUG);
-            levels.add(TRACE);
+            levels.add(Level.INFO);
+            levels.add(Level.SEVERE);
+            levels.add(Level.WARN);
+            levels.add(Level.DEBUG);
+            levels.add(Level.TRACE);
         }
 
         @Override

@@ -1,10 +1,8 @@
 package com.jlogm;
 
-import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,6 +14,12 @@ import java.util.Objects;
 public interface Level extends Serializable {
 
     // Static initializers
+
+    @NotNull Level TRACE  = create("TRACE");
+    @NotNull Level INFO = create("INFO");
+    @NotNull Level SEVERE = create("SEVERE");
+    @NotNull Level WARN = create("WARN");
+    @NotNull Level DEBUG = create("DEBUG");
 
     static @NotNull Level create(final @NotNull String name) {
         return new Level() {
@@ -36,6 +40,7 @@ public interface Level extends Serializable {
                 @NotNull Level that = (Level) object;
                 return Objects.equals(getName(), that.getName());
             }
+
             @Override
             public int hashCode() {
                 return Objects.hash(getName());
@@ -44,37 +49,6 @@ public interface Level extends Serializable {
             @Override
             public @NotNull String toString() {
                 return getName().toUpperCase();
-            }
-
-        };
-    }
-    static @NotNull Level create(final @NotNull String name, final @NotNull Color color) {
-        return new Level() {
-
-            // Getters
-
-            @Override
-            public @NotNull String getName() {
-                return name;
-            }
-
-            // Implementations
-
-            @Override
-            public boolean equals(@Nullable Object object) {
-                if (this == object) return true;
-                if (object == null || getClass() != object.getClass()) return false;
-                @NotNull Level that = (Level) object;
-                return Objects.equals(getName(), that.getName());
-            }
-            @Override
-            public int hashCode() {
-                return Objects.hash(getName());
-            }
-
-            @Override
-            public @NotNull String toString() {
-                return Colors.colored(color, getName().toUpperCase());
             }
 
         };

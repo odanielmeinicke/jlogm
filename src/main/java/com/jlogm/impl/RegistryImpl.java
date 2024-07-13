@@ -293,6 +293,10 @@ public final class RegistryImpl implements Registry {
         @NotNull String[] sources = origin.getClassName().split("\\.");
         @NotNull String source = sources[sources.length - 1] + (origin.getLineNumber() >= 0 ? ":" + origin.getLineNumber() : "");
 
+        // Colors
+        @Nullable Color color = LoggerFactoryImpl.getColor(this.level);
+        @NotNull String level = (color != null ? Colors.colored(color, this.level.getName()) : this.level.getName());
+
         // Generate message
         @NotNull String message = bold(colored(new Color(65, 65, 65), "| ")) + date + " " + level + "  " + markers + source + " - " + content;
 

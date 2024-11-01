@@ -10,10 +10,11 @@ import com.jlogm.fluent.StackFilter;
 import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Marker;
 
 import java.awt.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -27,6 +28,7 @@ public final class RegistryImpl implements Registry {
 
     // Static initializers
 
+    private static final @NotNull BufferedWriter writer;
     private static final @NotNull Map<String, Color> colors = new HashMap<String, Color>() {{
         put("loading", new Color(0, 180, 255));
         put("initializing", new Color(0, 180, 255));
@@ -67,25 +69,29 @@ public final class RegistryImpl implements Registry {
         put("cannot", new Color(220, 0, 0));
     }};
 
+    static {
+        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(FileDescriptor.out), StandardCharsets.US_ASCII), 512);
+    }
+
     // Object
 
     private final @NotNull Level level;
 
     private final @NotNull OffsetDateTime date;
 
-    private @UnknownNullability Throwable throwable;
+    private @Nullable Throwable throwable;
 
     private transient @NotNull StackFilter @NotNull [] stackFilters;
     private @NotNull Marker @NotNull [] markers;
 
-    private transient @UnknownNullability Every every;
+    private transient @Nullable Every every;
     private @NotNull LogOrigin origin;
 
     private @Nullable Object object;
 
     private boolean suppressed = false;
 
-    RegistryImpl(@NotNull Level level, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @UnknownNullability Every every) {
+    RegistryImpl(@NotNull Level level, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
         this.level = level;
         this.date = date;
         this.stackFilters = stackFilters;
@@ -134,7 +140,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Every getEvery() {
+    public @Nullable Every getEvery() {
         return every;
     }
 
@@ -151,7 +157,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Throwable getCause() {
+    public @Nullable Throwable getCause() {
         return throwable;
     }
 
@@ -300,9 +306,19 @@ public final class RegistryImpl implements Registry {
         // Generate message
         @NotNull String message = bold(colored(new Color(65, 65, 65), "| ")) + date + " " + level + "  " + markers + source + " - " + content;
 
-        // Finish
+        // Check suppress
         if (isSuppressed()) return;
-        System.out.println(message);
+
+        // Print
+        try {
+            synchronized (writer) {
+                writer.write(message);
+                writer.write("\n");
+                writer.flush();
+            }
+        } catch (@NotNull IOException e) {
+            throw new RuntimeException("cannot print message using JLOGM", e);
+        }
     }
 
     // Implementations

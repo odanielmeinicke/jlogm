@@ -18,13 +18,13 @@ public interface Registry extends Serializable {
     @NotNull LogOrigin getOrigin();
 
     @NotNull Registry every(@NotNull Every every);
-    @NotNull Every getEvery();
+    @Nullable Every getEvery();
 
     default @NotNull Registry withCause(@NotNull Throwable throwable) {
         return withCause(throwable, StackFilter.FULL);
     }
     @NotNull Registry withCause(@NotNull Throwable throwable, @NotNull StackFilter @NotNull ... filters);
-    @NotNull Throwable getCause();
+    @Nullable Throwable getCause();
 
     @NotNull Registry stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull StackFilter @NotNull [] getStackFilters();

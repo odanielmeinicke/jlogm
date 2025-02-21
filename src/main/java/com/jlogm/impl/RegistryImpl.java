@@ -7,7 +7,6 @@ import com.jlogm.factory.LoggerFactory.Registries;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;
-import com.jlogm.formatter.DefaultFormatter;
 import com.jlogm.formatter.Formatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,14 +38,14 @@ public final class RegistryImpl implements Registry {
     private @NotNull String prefix = "";
 
     private @Nullable Object object;
-
-    private @NotNull Formatter formatter = new DefaultFormatter();
+    private @NotNull Formatter formatter;
 
     private boolean suppressed = false;
 
-    RegistryImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
+    RegistryImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull Formatter formatter, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
         this.level = level;
         this.output = output;
+        this.formatter = formatter;
         this.date = date;
         this.stackFilters = stackFilters;
         this.markers = markers;
@@ -84,7 +83,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable LogOrigin getOrigin() {
+    public @Nullable LogOrigin origin() {
         return origin;
     }
 
@@ -94,7 +93,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable Every getEvery() {
+    public @Nullable Every every() {
         return every;
     }
 
@@ -104,7 +103,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull String getPrefix() {
+    public @NotNull String prefix() {
         return prefix;
     }
 
@@ -114,7 +113,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull String getSuffix() {
+    public @NotNull String suffix() {
         return suffix;
     }
 
@@ -124,7 +123,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Formatter getFormatter() {
+    public @NotNull Formatter formatter() {
         return formatter;
     }
 
@@ -141,7 +140,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable Throwable getCause() {
+    public @Nullable Throwable cause() {
         return throwable;
     }
 
@@ -151,7 +150,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull StackFilter @NotNull [] getStackFilters() {
+    public @NotNull StackFilter @NotNull [] stackFilters() {
         return stackFilters;
     }
 
@@ -161,7 +160,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Marker @NotNull [] getMarkers() {
+    public @NotNull Marker @NotNull [] markers() {
         return markers;
     }
 

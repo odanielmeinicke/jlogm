@@ -3,6 +3,7 @@ package com.jlogm;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
+import com.jlogm.formatter.Formatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
@@ -32,17 +33,20 @@ public interface Logger {
     @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
     @NotNull Logger marker(@NotNull String name);
     @NotNull Logger marker(@NotNull String name, @Nullable Color color);
-    @NotNull Marker @NotNull [] marker();
+    @NotNull Marker @NotNull [] markers();
 
     @NotNull Logger output(@NotNull OutputStream output);
-    @NotNull OutputStream getOutput();
+    @NotNull OutputStream output();
+
+    @NotNull Logger formatter(@NotNull Formatter formatter);
+    @NotNull Formatter formatter();
 
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);
     @NotNull StackFilter @NotNull [] stackFilters();
 
     @NotNull Logger consumer(@NotNull Consumer<Registry> registry);
-    @NotNull Consumer<Registry> @NotNull [] getConsumers();
+    @NotNull Consumer<Registry> @NotNull [] consumers();
 
     @NotNull Registry registry(@NotNull Level level);
 

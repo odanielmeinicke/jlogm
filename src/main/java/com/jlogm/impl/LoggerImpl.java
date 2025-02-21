@@ -5,6 +5,8 @@ import com.jlogm.Logger;
 import com.jlogm.Registry;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
+import com.jlogm.formatter.DefaultFormatter;
+import com.jlogm.formatter.Formatter;
 import com.jlogm.utils.Colors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,8 +16,8 @@ import org.slf4j.Marker;
 import java.awt.*;
 import java.io.OutputStream;
 import java.time.OffsetDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 final class LoggerImpl implements Logger {
@@ -28,6 +30,7 @@ final class LoggerImpl implements Logger {
     private final @NotNull Set<Marker> markers = new LinkedHashSet<>();
     private final @NotNull List<Consumer<Registry>> consumers = new LinkedList<>();
 
+    private @NotNull Formatter formatter = new DefaultFormatter();
     private @NotNull OutputStream output = System.out;
 
     private @UnknownNullability Every every;
@@ -72,7 +75,7 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Marker @NotNull [] marker() {
+    public @NotNull Marker @NotNull [] markers() {
         return this.markers.toArray(new Marker[0]);
     }
 
@@ -82,8 +85,18 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull OutputStream getOutput() {
+    public @NotNull OutputStream output() {
         return output;
+    }
+
+    @Override
+    public @NotNull Logger formatter(@NotNull Formatter formatter) {
+        this.formatter = formatter;
+        return this;
+    }
+    @Override
+    public @NotNull Formatter formatter() {
+        return formatter;
     }
 
     @Override
@@ -109,7 +122,7 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull Consumer<Registry> @NotNull [] getConsumers() {
+    public @NotNull Consumer<Registry> @NotNull [] consumers() {
         //noinspection unchecked
         return consumers.toArray(new Consumer[0]);
     }
@@ -119,7 +132,7 @@ final class LoggerImpl implements Logger {
     @Override
     public @NotNull Registry registry(@NotNull Level level) {
         // Generate registry
-        @NotNull Registry registry = new RegistryImpl(level, output, OffsetDateTime.now(), stackFilters.toArray(new StackFilter[0]), markers.toArray(new Marker[0]), every);
+        @NotNull Registry registry = new RegistryImpl(level, output(), formatter(), OffsetDateTime.now(), stackFilters(), markers(), every());
 
         // Call consumers
         for (@NotNull Consumer<Registry> consumer : consumers) {

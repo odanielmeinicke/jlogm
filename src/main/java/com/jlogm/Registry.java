@@ -16,31 +16,31 @@ public interface Registry extends Serializable {
     @NotNull OffsetDateTime getDate();
 
     @NotNull Registry withOrigin(@Nullable LogOrigin origin);
-    @Nullable LogOrigin getOrigin();
+    @Nullable LogOrigin origin();
 
     @NotNull Registry every(@NotNull Every every);
-    @Nullable Every getEvery();
+    @Nullable Every every();
 
     @NotNull Registry prefix(@NotNull String prefix);
-    @NotNull String getPrefix();
+    @NotNull String prefix();
 
     @NotNull Registry suffix(@NotNull String suffix);
-    @NotNull String getSuffix();
+    @NotNull String suffix();
 
     @NotNull Registry formatter(@NotNull Formatter formatter);
-    @NotNull Formatter getFormatter();
+    @NotNull Formatter formatter();
 
     default @NotNull Registry withCause(@NotNull Throwable throwable) {
         return withCause(throwable, StackFilter.FULL);
     }
     @NotNull Registry withCause(@NotNull Throwable throwable, @NotNull StackFilter @NotNull ... filters);
-    @Nullable Throwable getCause();
+    @Nullable Throwable cause();
 
     @NotNull Registry stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
-    @NotNull StackFilter @NotNull [] getStackFilters();
+    @NotNull StackFilter @NotNull [] stackFilters();
 
     @NotNull Registry markers(@NotNull Marker @NotNull ... markers);
-    @NotNull Marker @NotNull [] getMarkers();
+    @NotNull Marker @NotNull [] markers();
 
     default void log() {
         log(null);

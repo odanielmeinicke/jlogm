@@ -87,7 +87,7 @@ public final class DefaultFormatter implements Formatter {
             return pattern.matcher(string).find();
         };
         @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
-            for (@NotNull StackFilter filter : registry.getStackFilters()) {
+            for (@NotNull StackFilter filter : registry.stackFilters()) {
                 elements = filter.format(elements);
             }
 
@@ -117,22 +117,22 @@ public final class DefaultFormatter implements Formatter {
                 }
             }
         }
-        if (registry.getCause() != null) {
-            @NotNull StackTraceElement[] traces = traceFilter.apply(registry.getCause().getStackTrace());
+        if (registry.cause() != null) {
+            @NotNull StackTraceElement[] traces = traceFilter.apply(registry.cause().getStackTrace());
 
             if (object != null) {
                 content.append(System.lineSeparator());
             }
 
-            @Nullable String message = registry.getCause().getMessage() != null ? registry.getCause().getMessage().replace("\r", "") : null;
-            content.append(registry.getCause().getClass().getName()).append(": ").append(message).append(System.lineSeparator());
+            @Nullable String message = registry.cause().getMessage() != null ? registry.cause().getMessage().replace("\r", "") : null;
+            content.append(registry.cause().getClass().getName()).append(": ").append(message).append(System.lineSeparator());
 
             for (int index = 0; index < traces.length; index++) {
                 if (index > 0) content.append(System.lineSeparator());
                 content.append("\tat ").append(traces[index]);
             }
 
-            @Nullable Throwable recurring = registry.getCause().getCause();
+            @Nullable Throwable recurring = registry.cause().getCause();
             while (recurring != null) {
                 traces = traceFilter.apply(recurring.getStackTrace());
 
@@ -153,7 +153,7 @@ public final class DefaultFormatter implements Formatter {
         // Markers
         @NotNull StringBuilder markers = new StringBuilder();
         int row = 0;
-        for (@NotNull Marker marker : registry.getMarkers()) {
+        for (@NotNull Marker marker : registry.markers()) {
             markers.append(" ").append(marker);
 
             for (@NotNull Iterator<Marker> it = marker.iterator(); it.hasNext(); ) {
@@ -161,7 +161,7 @@ public final class DefaultFormatter implements Formatter {
                 markers.append(" ").append(children.toString());
             }
 
-            if (row + 1 == registry.getMarkers().length) markers.append(" ");
+            if (row + 1 == registry.markers().length) markers.append(" ");
             row++;
         }
 
@@ -173,9 +173,9 @@ public final class DefaultFormatter implements Formatter {
         // Source
         @Nullable String source = null;
 
-        if (registry.getOrigin() != null) {
-            @NotNull String[] sources = registry.getOrigin().getClassName().split("\\.");
-            source = sources[sources.length - 1] + (registry.getOrigin().getLineNumber() >= 0 ? ":" + registry.getOrigin().getLineNumber() : "");
+        if (registry.origin() != null) {
+            @NotNull String[] sources = registry.origin().getClassName().split("\\.");
+            source = sources[sources.length - 1] + (registry.origin().getLineNumber() >= 0 ? ":" + registry.origin().getLineNumber() : "");
         }
 
         // Colors
@@ -186,6 +186,6 @@ public final class DefaultFormatter implements Formatter {
         @NotNull String message = bold(colored(new Color(65, 65, 65), "| ")) + date + " " + level + " " + markers + (source != null ? " " + source : "") + " - " + content;
 
         // Finish
-        return registry.getPrefix() + message + registry.getSuffix();
+        return registry.prefix() + message + registry.suffix();
     }
 }

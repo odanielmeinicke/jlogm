@@ -20,6 +20,12 @@ public interface Registry extends Serializable {
     @NotNull Registry every(@NotNull Every every);
     @Nullable Every getEvery();
 
+    @NotNull Registry prefix(@NotNull String prefix);
+    @NotNull String getPrefix();
+
+    @NotNull Registry suffix(@NotNull String suffix);
+    @NotNull String getSuffix();
+
     default @NotNull Registry withCause(@NotNull Throwable throwable) {
         return withCause(throwable, StackFilter.FULL);
     }

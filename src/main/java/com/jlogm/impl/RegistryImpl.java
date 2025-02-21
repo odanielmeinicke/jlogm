@@ -87,6 +87,9 @@ public final class RegistryImpl implements Registry {
     private transient @Nullable Every every;
     private @NotNull LogOrigin origin;
 
+    private @NotNull String suffix = "\n";
+    private @NotNull String prefix = "";
+
     private @Nullable Object object;
 
     private boolean suppressed = false;
@@ -142,6 +145,26 @@ public final class RegistryImpl implements Registry {
     @Override
     public @Nullable Every getEvery() {
         return every;
+    }
+
+    @Override
+    public @NotNull Registry prefix(@NotNull String prefix) {
+        this.prefix = prefix;
+        return this;
+    }
+    @Override
+    public @NotNull String getPrefix() {
+        return prefix;
+    }
+
+    @Override
+    public @NotNull Registry suffix(@NotNull String suffix) {
+        this.suffix = suffix;
+        return this;
+    }
+    @Override
+    public @NotNull String getSuffix() {
+        return suffix;
     }
 
     @Override
@@ -220,7 +243,7 @@ public final class RegistryImpl implements Registry {
 
         // Content
         if (object != null) {
-            @NotNull String[] parts = object.toString().replace("\r", "").split(" ");
+            @NotNull String[] parts = object.toString().replace("\r", "").split(" ", -1);
 
             for (int index = 0; index < parts.length; index++) {
                 @NotNull String part = parts[index];
@@ -278,7 +301,7 @@ public final class RegistryImpl implements Registry {
         @NotNull StringBuilder markers = new StringBuilder();
         int row = 0;
         for (@NotNull Marker marker : this.markers) {
-            markers.append(marker.toString()).append(" ");
+            markers.append(marker).append(" ");
 
             for (@NotNull Iterator<Marker> it = marker.iterator(); it.hasNext(); ) {
                 @NotNull Marker children = it.next();
@@ -296,8 +319,8 @@ public final class RegistryImpl implements Registry {
         date = String.format("%-" + 21 + "s", date);
 
         // Source
-        @NotNull String[] sources = origin.getClassName().split("\\.");
-        @NotNull String source = sources[sources.length - 1] + (origin.getLineNumber() >= 0 ? ":" + origin.getLineNumber() : "");
+        @NotNull String[] sources = getOrigin().getClassName().split("\\.");
+        @NotNull String source = sources[sources.length - 1] + (getOrigin().getLineNumber() >= 0 ? ":" + getOrigin().getLineNumber() : "");
 
         // Colors
         @Nullable Color color = LoggerFactoryImpl.getColor(this.level);
@@ -312,12 +335,13 @@ public final class RegistryImpl implements Registry {
         // Print
         try {
             synchronized (writer) {
-                writer.write(message);
-                writer.write("\n");
+                writer.write(getPrefix().toCharArray());
+                writer.write(message.toCharArray());
+                writer.write(getSuffix().toCharArray());
                 writer.flush();
             }
         } catch (@NotNull IOException e) {
-            throw new RuntimeException("cannot print message using JLOGM", e);
+            throw new RuntimeException("cannot print message using jlogm", e);
         }
     }
 

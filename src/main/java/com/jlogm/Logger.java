@@ -3,12 +3,13 @@ package com.jlogm;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
 import java.awt.*;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 public interface Logger {
 
@@ -25,20 +26,23 @@ public interface Logger {
 
     @NotNull String getName();
 
-    @Contract("_->this")
     @NotNull Logger every(@NotNull Every every);
     @NotNull Every every();
 
-    @Contract("_->this")
     @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
     @NotNull Logger marker(@NotNull String name);
     @NotNull Logger marker(@NotNull String name, @Nullable Color color);
     @NotNull Marker @NotNull [] marker();
 
-    @Contract("_->this")
+    @NotNull Logger output(@NotNull OutputStream output);
+    @NotNull OutputStream getOutput();
+
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);
     @NotNull StackFilter @NotNull [] stackFilters();
+
+    @NotNull Logger consumer(@NotNull Consumer<Registry> registry);
+    @NotNull Consumer<Registry> @NotNull [] getConsumers();
 
     @NotNull Registry registry(@NotNull Level level);
 

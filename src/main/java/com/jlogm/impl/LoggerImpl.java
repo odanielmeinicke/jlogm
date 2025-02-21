@@ -12,8 +12,11 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Marker;
 
 import java.awt.*;
+import java.io.OutputStream;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.List;
+import java.util.function.Consumer;
 
 final class LoggerImpl implements Logger {
 
@@ -23,6 +26,9 @@ final class LoggerImpl implements Logger {
 
     private final @NotNull Set<StackFilter> stackFilters = new LinkedHashSet<>();
     private final @NotNull Set<Marker> markers = new LinkedHashSet<>();
+    private final @NotNull List<Consumer<Registry>> consumers = new LinkedList<>();
+
+    private @NotNull OutputStream output = System.out;
 
     private @UnknownNullability Every every;
 
@@ -71,6 +77,16 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
+    public @NotNull Logger output(@NotNull OutputStream output) {
+        this.output = output;
+        return this;
+    }
+    @Override
+    public @NotNull OutputStream getOutput() {
+        return output;
+    }
+
+    @Override
     public @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters) {
         this.stackFilters.clear();
         this.stackFilters.addAll(Arrays.asList(stackFilters));
@@ -87,11 +103,31 @@ final class LoggerImpl implements Logger {
         return stackFilters.toArray(new StackFilter[0]);
     }
 
+    @Override
+    public @NotNull Logger consumer(@NotNull Consumer<Registry> registry) {
+        consumers.add(0, registry);
+        return this;
+    }
+    @Override
+    public @NotNull Consumer<Registry> @NotNull [] getConsumers() {
+        //noinspection unchecked
+        return consumers.toArray(new Consumer[0]);
+    }
+
     // Modules
 
     @Override
     public @NotNull Registry registry(@NotNull Level level) {
-        return new RegistryImpl(level, OffsetDateTime.now(), stackFilters.toArray(new StackFilter[0]), markers.toArray(new Marker[0]), every);
+        // Generate registry
+        @NotNull Registry registry = new RegistryImpl(level, output, OffsetDateTime.now(), stackFilters.toArray(new StackFilter[0]), markers.toArray(new Marker[0]), every);
+
+        // Call consumers
+        for (@NotNull Consumer<Registry> consumer : consumers) {
+            consumer.accept(registry);
+        }
+
+        // Finish
+        return registry;
     }
 
     // Implementations
@@ -192,7 +228,7 @@ final class LoggerImpl implements Logger {
 
         @Override
         public @NotNull String toString() {
-            return (getColor() != null ? Colors.colored(getColor()) : "") + getName();
+            return (getColor() != null ? Colors.colored(getColor()) : "") + getName() + (getColor() != null ? Colors.reset() : "");
         }
 
     }

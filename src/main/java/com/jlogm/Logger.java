@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
+import java.awt.*;
+
 public interface Logger {
 
     // Static initializers
@@ -28,11 +30,14 @@ public interface Logger {
     @NotNull Every every();
 
     @Contract("_->this")
-    @NotNull Logger marker(@NotNull Marker @NotNull ... markers);
+    @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
+    @NotNull Logger marker(@NotNull String name);
+    @NotNull Logger marker(@NotNull String name, @Nullable Color color);
     @NotNull Marker @NotNull [] marker();
 
     @Contract("_->this")
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
+    @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);
     @NotNull StackFilter @NotNull [] stackFilters();
 
     @NotNull Registry registry(@NotNull Level level);

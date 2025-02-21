@@ -7,75 +7,23 @@ import com.jlogm.factory.LoggerFactory.Registries;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;
-import com.jlogm.utils.Colors;
+import com.jlogm.formatter.DefaultFormatter;
+import com.jlogm.formatter.Formatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
-import java.awt.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
-import static com.jlogm.utils.Colors.*;
+import java.util.Arrays;
 
 public final class RegistryImpl implements Registry {
-
-    // Static initializers
-
-    private static final @NotNull BufferedWriter writer;
-    private static final @NotNull Map<String, Color> colors = new HashMap<String, Color>() {{
-        put("loading", new Color(0, 180, 255));
-        put("initializing", new Color(0, 180, 255));
-        put("generating", new Color(0, 180, 255));
-        put("saving", new Color(0, 180, 255));
-        put("enabling", new Color(0, 180, 255));
-        put("uploading", new Color(0, 180, 255));
-        put("importing", new Color(0, 180, 255));
-        put("localhost", new Color(0, 180, 255));
-        put("127.0.0.1", new Color(0, 180, 255));
-        put("running", new Color(0, 180, 255));
-        put("loaded", new Color(0, 180, 255));
-
-        put("successfully", new Color(0, 180, 0));
-        put("connected", new Color(0, 180, 0));
-        put("success", new Color(0, 180, 0));
-        put("initialized", new Color(0, 180, 0));
-        put("saved", new Color(0, 180, 0));
-        put("enabled", new Color(0, 180, 0));
-        put("unloaded", new Color(0, 180, 0));
-        put("uploaded", new Color(0, 180, 0));
-        put("imported", new Color(0, 180, 0));
-        put("done", new Color(0, 180, 0));
-
-        put("warning", Color.YELLOW);
-
-        put("unloading", Color.ORANGE);
-        put("stopping", Color.ORANGE);
-        put("disabling", Color.ORANGE);
-
-        put("disconnected", new Color(220, 0, 0));
-        put("error", new Color(220, 0, 0));
-        put("failed", new Color(220, 0, 0));
-        put("fail", new Color(220, 0, 0));
-        put("failure", new Color(220, 0, 0));
-        put("exception", new Color(220, 0, 0));
-        put("issue", new Color(220, 0, 0));
-        put("cannot", new Color(220, 0, 0));
-    }};
-
-    static {
-        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(FileDescriptor.out), StandardCharsets.US_ASCII), 512);
-    }
 
     // Object
 
     private final @NotNull Level level;
+    private final @NotNull OutputStream output;
 
     private final @NotNull OffsetDateTime date;
 
@@ -85,17 +33,20 @@ public final class RegistryImpl implements Registry {
     private @NotNull Marker @NotNull [] markers;
 
     private transient @Nullable Every every;
-    private @NotNull LogOrigin origin;
+    private @Nullable LogOrigin origin;
 
     private @NotNull String suffix = "\n";
     private @NotNull String prefix = "";
 
     private @Nullable Object object;
 
+    private @NotNull Formatter formatter = new DefaultFormatter();
+
     private boolean suppressed = false;
 
-    RegistryImpl(@NotNull Level level, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
+    RegistryImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
         this.level = level;
+        this.output = output;
         this.date = date;
         this.stackFilters = stackFilters;
         this.markers = markers;
@@ -128,12 +79,12 @@ public final class RegistryImpl implements Registry {
     }
 
     @Override
-    public @NotNull Registry withOrigin(@NotNull LogOrigin origin) {
+    public @NotNull Registry withOrigin(@Nullable LogOrigin origin) {
         this.origin = origin;
         return this;
     }
     @Override
-    public @NotNull LogOrigin getOrigin() {
+    public @Nullable LogOrigin getOrigin() {
         return origin;
     }
 
@@ -165,6 +116,16 @@ public final class RegistryImpl implements Registry {
     @Override
     public @NotNull String getSuffix() {
         return suffix;
+    }
+
+    @Override
+    public @NotNull Registry formatter(@NotNull Formatter formatter) {
+        this.formatter = formatter;
+        return this;
+    }
+    @Override
+    public @NotNull Formatter getFormatter() {
+        return formatter;
     }
 
     @Override
@@ -226,119 +187,18 @@ public final class RegistryImpl implements Registry {
             registries.add(this);
         }
 
-        // Message
-        @NotNull StringBuilder content = new StringBuilder();
-
-        @NotNull Predicate<String> url = string -> {
-            @NotNull Pattern pattern = Pattern.compile("^(http(s?)://)?(((www\\.)?[a-zA-Z0-9.\\-_]+(\\.[a-zA-Z]{2,3})+)|(\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b))(/[a-zA-Z0-9_\\-\\s./?%#&=]*)?$");
-            return pattern.matcher(string).find();
-        };
-        @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
-            for (@NotNull StackFilter filter : stackFilters) {
-                elements = filter.format(elements);
-            }
-
-            return elements;
-        };
-
-        // Content
-        if (object != null) {
-            @NotNull String[] parts = object.toString().replace("\r", "").split(" ", -1);
-
-            for (int index = 0; index < parts.length; index++) {
-                @NotNull String part = parts[index];
-                @Nullable String color = null;
-
-                if (colors.containsKey(part.toLowerCase())) {
-                    color = Colors.colored(colors.get(part.toLowerCase()));
-                } if (url.test(part)) {
-                    color = color + Colors.underlined();
-                }
-
-                content.append(color != null ? color : "")
-                        .append(part)
-                        .append(color != null ? reset() : "");
-
-                if (index + 1 != parts.length) {
-                    content.append(" ");
-                }
-            }
-        }
-        if (throwable != null) {
-            @NotNull StackTraceElement[] traces = traceFilter.apply(throwable.getStackTrace());
-
-            if (object != null) {
-                content.append(System.lineSeparator());
-            }
-
-            @Nullable String message = throwable.getMessage() != null ? throwable.getMessage().replace("\r", "") : null;
-            content.append(throwable.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
-
-            for (int index = 0; index < traces.length; index++) {
-                if (index > 0) content.append(System.lineSeparator());
-                content.append("\tat ").append(traces[index]);
-            }
-
-            @Nullable Throwable recurring = throwable.getCause();
-            while (recurring != null) {
-                traces = traceFilter.apply(recurring.getStackTrace());
-
-                content.append(System.lineSeparator());
-
-                message = recurring.getMessage() != null ? recurring.getMessage().replace("\r", "") : null;
-                content.append("Caused by ").append(recurring.getClass().getName()).append(": ").append(message).append(System.lineSeparator());
-
-                for (int index = 0; index < traces.length; index++) {
-                    if (index > 0) content.append(System.lineSeparator());
-                    content.append("\tat ").append(traces[index]);
-                }
-
-                recurring = recurring.getCause();
-            }
-        }
-
-        // Markers
-        @NotNull StringBuilder markers = new StringBuilder();
-        int row = 0;
-        for (@NotNull Marker marker : this.markers) {
-            markers.append(marker).append(" ");
-
-            for (@NotNull Iterator<Marker> it = marker.iterator(); it.hasNext(); ) {
-                @NotNull Marker children = it.next();
-                markers.append(children.toString());
-                if (it.hasNext()) markers.append(" ");
-            }
-
-            if (row + 1 >= this.markers.length) markers.append(" ");
-            row++;
-        }
-
-        // Date
-        @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM HH:mm:ss.S");
-        @NotNull String date = format.format(new Date(getDate().toInstant().toEpochMilli()));
-        date = String.format("%-" + 21 + "s", date);
-
-        // Source
-        @NotNull String[] sources = getOrigin().getClassName().split("\\.");
-        @NotNull String source = sources[sources.length - 1] + (getOrigin().getLineNumber() >= 0 ? ":" + getOrigin().getLineNumber() : "");
-
-        // Colors
-        @Nullable Color color = LoggerFactoryImpl.getColor(this.level);
-        @NotNull String level = (color != null ? Colors.colored(color, this.level.getName()) : this.level.getName());
-
         // Generate message
-        @NotNull String message = bold(colored(new Color(65, 65, 65), "| ")) + date + " " + level + "  " + markers + source + " - " + content;
+        @NotNull Formatter formatter = this.formatter;
+        @NotNull String message = formatter.format(this, object);
 
         // Check suppress
         if (isSuppressed()) return;
 
         // Print
         try {
-            synchronized (writer) {
-                writer.write(getPrefix().toCharArray());
-                writer.write(message.toCharArray());
-                writer.write(getSuffix().toCharArray());
-                writer.flush();
+            synchronized (output) {
+                output.write(message.getBytes(formatter.getCharset()));
+                output.flush();
             }
         } catch (@NotNull IOException e) {
             throw new RuntimeException("cannot print message using jlogm", e);

@@ -3,6 +3,7 @@ package com.jlogm;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.LogOrigin;
 import com.jlogm.fluent.StackFilter;
+import com.jlogm.formatter.Formatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
@@ -14,8 +15,8 @@ public interface Registry extends Serializable {
     @NotNull Level getLevel();
     @NotNull OffsetDateTime getDate();
 
-    @NotNull Registry withOrigin(@NotNull LogOrigin origin);
-    @NotNull LogOrigin getOrigin();
+    @NotNull Registry withOrigin(@Nullable LogOrigin origin);
+    @Nullable LogOrigin getOrigin();
 
     @NotNull Registry every(@NotNull Every every);
     @Nullable Every getEvery();
@@ -25,6 +26,9 @@ public interface Registry extends Serializable {
 
     @NotNull Registry suffix(@NotNull String suffix);
     @NotNull String getSuffix();
+
+    @NotNull Registry formatter(@NotNull Formatter formatter);
+    @NotNull Formatter getFormatter();
 
     default @NotNull Registry withCause(@NotNull Throwable throwable) {
         return withCause(throwable, StackFilter.FULL);
@@ -44,4 +48,6 @@ public interface Registry extends Serializable {
     void log(@Nullable Object object);
 
     boolean isSuppressed();
+    void setSuppressed(boolean suppressed);
+
 }

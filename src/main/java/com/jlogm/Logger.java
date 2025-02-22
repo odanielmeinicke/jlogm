@@ -33,20 +33,20 @@ public interface Logger {
     @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
     @NotNull Logger marker(@NotNull String name);
     @NotNull Logger marker(@NotNull String name, @Nullable Color color);
-    @NotNull Marker @NotNull [] markers();
+    @NotNull Marker @NotNull [] getMarkers();
 
     @NotNull Logger output(@NotNull OutputStream output);
-    @NotNull OutputStream output();
+    @NotNull OutputStream getOutput();
 
     @NotNull Logger formatter(@NotNull Formatter formatter);
-    @NotNull Formatter formatter();
+    @NotNull Formatter getFormatter();
 
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);
-    @NotNull StackFilter @NotNull [] stackFilters();
+    @NotNull StackFilter @NotNull [] getStackFilters();
 
     @NotNull Logger consumer(@NotNull Consumer<Registry> registry);
-    @NotNull Consumer<Registry> @NotNull [] consumers();
+    @NotNull Consumer<Registry> @NotNull [] getConsumers();
 
     @NotNull Registry registry(@NotNull Level level);
 

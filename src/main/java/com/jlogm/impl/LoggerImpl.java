@@ -7,7 +7,7 @@ import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
 import com.jlogm.formatter.DefaultFormatter;
 import com.jlogm.formatter.Formatter;
-import com.jlogm.utils.Colors;
+import com.jlogm.utils.Coloured;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -75,7 +75,7 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Marker @NotNull [] markers() {
+    public @NotNull Marker @NotNull [] getMarkers() {
         return this.markers.toArray(new Marker[0]);
     }
 
@@ -85,7 +85,7 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull OutputStream output() {
+    public @NotNull OutputStream getOutput() {
         return output;
     }
 
@@ -95,7 +95,7 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull Formatter formatter() {
+    public @NotNull Formatter getFormatter() {
         return formatter;
     }
 
@@ -112,7 +112,7 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull StackFilter @NotNull [] stackFilters() {
+    public @NotNull StackFilter @NotNull [] getStackFilters() {
         return stackFilters.toArray(new StackFilter[0]);
     }
 
@@ -122,7 +122,7 @@ final class LoggerImpl implements Logger {
         return this;
     }
     @Override
-    public @NotNull Consumer<Registry> @NotNull [] consumers() {
+    public @NotNull Consumer<Registry> @NotNull [] getConsumers() {
         //noinspection unchecked
         return consumers.toArray(new Consumer[0]);
     }
@@ -132,7 +132,7 @@ final class LoggerImpl implements Logger {
     @Override
     public @NotNull Registry registry(@NotNull Level level) {
         // Generate registry
-        @NotNull Registry registry = new RegistryImpl(level, output(), formatter(), OffsetDateTime.now(), stackFilters(), markers(), every());
+        @NotNull Registry registry = new RegistryImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), every());
 
         // Call consumers
         for (@NotNull Consumer<Registry> consumer : consumers) {
@@ -241,7 +241,7 @@ final class LoggerImpl implements Logger {
 
         @Override
         public @NotNull String toString() {
-            return (getColor() != null ? Colors.colored(getColor()) : "") + getName() + (getColor() != null ? Colors.reset() : "");
+            return (getColor() != null ? Coloured.of(getName()).color(getColor()).print() : "");
         }
 
     }

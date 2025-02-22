@@ -26,7 +26,7 @@ public interface Every {
 
             @Nullable Registry last = registries.stream()
                     .filter(second -> !second.isSuppressed())
-                    .filter(second -> Arrays.equals(second.markers(), registry.markers()))
+                    .filter(second -> Arrays.equals(second.getMarkers(), registry.getMarkers()))
                     .filter(second -> second.getLevel().equals(registry.getLevel()))
                     .filter(second -> {
                         if ((second instanceof RegistryImpl && registry instanceof RegistryImpl)) {
@@ -34,7 +34,7 @@ public interface Every {
                         }
                         return false;
                     })
-                    .filter(second -> second.origin().equals(registry.origin()))
+                    .filter(second -> second.getOrigin().equals(registry.getOrigin()))
                     .reduce((first, second) -> second)
                     .orElse(null);
 
@@ -49,7 +49,7 @@ public interface Every {
             }
 
             long count = registries.stream()
-                    .filter(second -> Arrays.equals(second.markers(), registry.markers()))
+                    .filter(second -> Arrays.equals(second.getMarkers(), registry.getMarkers()))
                     .filter(second -> second.getLevel().equals(registry.getLevel()))
                     .filter(second -> {
                         if ((second instanceof RegistryImpl && registry instanceof RegistryImpl)) {
@@ -57,7 +57,7 @@ public interface Every {
                         }
                         return false;
                     })
-                    .filter(second -> second.origin().equals(registry.origin()))
+                    .filter(second -> second.getOrigin().equals(registry.getOrigin()))
                     .count();
 
             return (count != 0 && (count - 1) % (number + 1) != 0);

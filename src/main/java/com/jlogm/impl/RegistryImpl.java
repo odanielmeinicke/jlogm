@@ -83,7 +83,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable LogOrigin origin() {
+    public @Nullable LogOrigin getOrigin() {
         return origin;
     }
 
@@ -93,7 +93,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable Every every() {
+    public @Nullable Every getEvery() {
         return every;
     }
 
@@ -103,7 +103,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull String prefix() {
+    public @NotNull String getPrefix() {
         return prefix;
     }
 
@@ -113,7 +113,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull String suffix() {
+    public @NotNull String getSuffix() {
         return suffix;
     }
 
@@ -123,7 +123,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Formatter formatter() {
+    public @NotNull Formatter getFormatter() {
         return formatter;
     }
 
@@ -140,7 +140,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @Nullable Throwable cause() {
+    public @Nullable Throwable getCause() {
         return throwable;
     }
 
@@ -150,7 +150,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull StackFilter @NotNull [] stackFilters() {
+    public @NotNull StackFilter @NotNull [] getStackFilters() {
         return stackFilters;
     }
 
@@ -160,7 +160,7 @@ public final class RegistryImpl implements Registry {
         return this;
     }
     @Override
-    public @NotNull Marker @NotNull [] markers() {
+    public @NotNull Marker @NotNull [] getMarkers() {
         return markers;
     }
 

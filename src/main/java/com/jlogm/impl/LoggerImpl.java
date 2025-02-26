@@ -7,7 +7,6 @@ import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
 import com.jlogm.formatter.DefaultFormatter;
 import com.jlogm.formatter.Formatter;
-import com.jlogm.utils.Coloured;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -57,10 +56,8 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Logger markers(@NotNull Marker @NotNull ... markers) {
-        this.markers.clear();
-        this.markers.addAll(Arrays.asList(markers));
-
+    public @NotNull Logger marker(@NotNull Marker marker) {
+        this.markers.add(marker);
         return this;
     }
     @Override
@@ -74,6 +71,13 @@ final class LoggerImpl implements Logger {
         return this;
     }
 
+    @Override
+    public @NotNull Logger markers(@NotNull Marker @NotNull ... markers) {
+        this.markers.clear();
+        this.markers.addAll(Arrays.asList(markers));
+
+        return this;
+    }
     @Override
     public @NotNull Marker @NotNull [] getMarkers() {
         return this.markers.toArray(new Marker[0]);
@@ -169,81 +173,5 @@ final class LoggerImpl implements Logger {
     }
 
     // Classes
-
-    static final class SimpleMarker implements Marker {
-
-        private final @NotNull String name;
-        private final @Nullable Color color;
-
-        private final @NotNull Set<Marker> markers = new LinkedHashSet<>();
-
-        public SimpleMarker(@NotNull String name) {
-            this.name = name;
-            this.color = null;
-        }
-        public SimpleMarker(@NotNull String name, @Nullable Color color) {
-            this.name = name;
-            this.color = color;
-        }
-
-        @Override
-        public @NotNull String getName() {
-            return name;
-        }
-        public @Nullable Color getColor() {
-            return color;
-        }
-
-        @Override
-        public void add(@NotNull Marker reference) {
-            markers.add(reference);
-        }
-        @Override
-        public boolean remove(@NotNull Marker reference) {
-            return markers.remove(reference);
-        }
-
-        @Override
-        public boolean hasChildren() {
-            return hasReferences();
-        }
-        @Override
-        public boolean hasReferences() {
-            return !markers.isEmpty();
-        }
-
-        @Override
-        public boolean contains(@NotNull Marker other) {
-            return false;
-        }
-        @Override
-        public boolean contains(@NotNull String name) {
-            return markers.stream().anyMatch(marker -> marker.getName().equals(name));
-        }
-
-        @Override
-        public @NotNull Iterator<Marker> iterator() {
-            return markers.iterator();
-        }
-
-        // Implementations
-
-        @Override
-        public boolean equals(@Nullable Object object) {
-            if (!(object instanceof Marker)) return false;
-            @NotNull Marker that = (Marker) object;
-            return Objects.equals(getName(), that.getName());
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hash(getName());
-        }
-
-        @Override
-        public @NotNull String toString() {
-            return (getColor() != null ? Coloured.of(getName()).color(getColor()).print() : "");
-        }
-
-    }
 
 }

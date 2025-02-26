@@ -30,9 +30,10 @@ public interface Logger {
     @NotNull Logger every(@NotNull Every every);
     @NotNull Every every();
 
-    @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
+    @NotNull Logger marker(@NotNull Marker marker);
     @NotNull Logger marker(@NotNull String name);
     @NotNull Logger marker(@NotNull String name, @Nullable Color color);
+    @NotNull Logger markers(@NotNull Marker @NotNull ... markers);
     @NotNull Marker @NotNull [] getMarkers();
 
     @NotNull Logger output(@NotNull OutputStream output);

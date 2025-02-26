@@ -200,9 +200,9 @@ public final class DefaultFormatter implements Formatter {
         }
 
         // Generate message
-        @NotNull String message = spacing + date + " " + level + " " + markers + (source != null ? " " + source : "") + " - " + content;
+        @NotNull String message = spacing + date + " " + level + " " + markers + (source != null ? " " + source : "") + " ";
 
         // Finish
-        return registry.getPrefix() + message + registry.getSuffix();
+        return message + registry.getPrefix() + content + registry.getSuffix();
     }
 }

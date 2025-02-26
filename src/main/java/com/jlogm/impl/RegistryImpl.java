@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public final class RegistryImpl implements Registry {
 
@@ -29,13 +31,13 @@ public final class RegistryImpl implements Registry {
     private @Nullable Throwable throwable;
 
     private transient @NotNull StackFilter @NotNull [] stackFilters;
-    private @NotNull Marker @NotNull [] markers;
+    private final @NotNull Set<Marker> markers;
 
     private transient @Nullable Every every;
     private @Nullable LogOrigin origin;
 
     private @NotNull String suffix = "\n";
-    private @NotNull String prefix = "";
+    private @NotNull String prefix = "- ";
 
     private @Nullable Object object;
     private @NotNull Formatter formatter;
@@ -48,7 +50,7 @@ public final class RegistryImpl implements Registry {
         this.formatter = formatter;
         this.date = date;
         this.stackFilters = stackFilters;
-        this.markers = markers;
+        this.markers = new LinkedHashSet<>(Arrays.asList(markers));
         this.every = every;
 
         // Origin
@@ -155,13 +157,20 @@ public final class RegistryImpl implements Registry {
     }
 
     @Override
+    public @NotNull Registry marker(@NotNull Marker marker) {
+        this.markers.add(marker);
+        return this;
+    }
+    @Override
     public @NotNull Registry markers(@NotNull Marker @NotNull ... markers) {
-        this.markers = markers;
+        this.markers.clear();
+        this.markers.addAll(Arrays.asList(markers));
+
         return this;
     }
     @Override
     public @NotNull Marker @NotNull [] getMarkers() {
-        return markers;
+        return markers.toArray(new Marker[0]);
     }
 
     public @Nullable Object getObject() {
@@ -213,7 +222,7 @@ public final class RegistryImpl implements Registry {
                 ", date=" + date +
                 ", throwable=" + throwable +
                 ", stackFilters=" + Arrays.toString(stackFilters) +
-                ", markers=" + Arrays.toString(markers) +
+                ", markers=" + markers +
                 ", every=" + every +
                 ", origin=" + origin +
                 ", suppressed=" + suppressed +

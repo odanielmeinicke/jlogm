@@ -39,6 +39,7 @@ public interface Registry extends Serializable {
     @NotNull Registry stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull StackFilter @NotNull [] getStackFilters();
 
+    @NotNull Registry marker(@NotNull Marker marker);
     @NotNull Registry markers(@NotNull Marker @NotNull ... markers);
     @NotNull Marker @NotNull [] getMarkers();
 

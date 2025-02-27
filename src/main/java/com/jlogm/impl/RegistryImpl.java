@@ -184,7 +184,7 @@ public final class RegistryImpl implements Registry {
         // Filters and suppression
         this.object = object;
 
-        if (LoggerFactory.getInstance().getFilters().isSuppressed(this)) {
+        if (LoggerFactory.getInstance().getFilters().isSuppressed(this, object)) {
             setSuppressed(true);
         } else if (every != null && !every.canLog(LoggerFactory.getInstance(), this)) {
             setSuppressed(true);

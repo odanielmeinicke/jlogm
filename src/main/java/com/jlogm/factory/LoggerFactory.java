@@ -100,13 +100,14 @@ public interface LoggerFactory {
     interface Filters extends Iterable<Filter> {
 
         /**
-         * Checks if a registry is suppressed by any of the filters.
+         * Checks if a registry with the passed object is suppressed by any of the filters.
          *
          * @param registry The registry to check.
+         * @param object The object to check.
          * @return True if the registry is suppressed, otherwise false.
          */
-        default boolean isSuppressed(@NotNull Registry registry) {
-            return stream().anyMatch(filter -> filter.isSuppressed(registry));
+        default boolean isSuppressed(@NotNull Registry registry, @Nullable Object object) {
+            return stream().anyMatch(filter -> filter.isSuppressed(registry, object));
         }
 
         /**

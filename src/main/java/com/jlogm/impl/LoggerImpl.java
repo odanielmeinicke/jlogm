@@ -2,7 +2,7 @@ package com.jlogm.impl;
 
 import com.jlogm.Level;
 import com.jlogm.Logger;
-import com.jlogm.Registry;
+import com.jlogm.Registry.Builder;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
 import com.jlogm.formatter.DefaultFormatter;
@@ -27,7 +27,7 @@ final class LoggerImpl implements Logger {
 
     private final @NotNull Set<StackFilter> stackFilters = new LinkedHashSet<>();
     private final @NotNull Set<Marker> markers = new LinkedHashSet<>();
-    private final @NotNull List<Consumer<Registry>> consumers = new LinkedList<>();
+    private final @NotNull List<Consumer<Builder>> consumers = new LinkedList<>();
 
     private @NotNull Formatter formatter = new DefaultFormatter();
     private @NotNull OutputStream output = System.out;
@@ -121,12 +121,12 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Logger consumer(@NotNull Consumer<Registry> registry) {
+    public @NotNull Logger consumer(@NotNull Consumer<Builder> registry) {
         consumers.add(0, registry);
         return this;
     }
     @Override
-    public @NotNull Consumer<Registry> @NotNull [] getConsumers() {
+    public @NotNull Consumer<Builder> @NotNull [] getConsumers() {
         //noinspection unchecked
         return consumers.toArray(new Consumer[0]);
     }
@@ -134,12 +134,12 @@ final class LoggerImpl implements Logger {
     // Modules
 
     @Override
-    public @NotNull Registry registry(@NotNull Level level) {
+    public @NotNull Builder registry(@NotNull Level level) {
         // Generate registry
-        @NotNull Registry registry = new RegistryImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), every());
+        @NotNull Builder registry = new RegistryImpl.BuilderImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), every());
 
         // Call consumers
-        for (@NotNull Consumer<Registry> consumer : consumers) {
+        for (@NotNull Consumer<Builder> consumer : consumers) {
             consumer.accept(registry);
         }
 

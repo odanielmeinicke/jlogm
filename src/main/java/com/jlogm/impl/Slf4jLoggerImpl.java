@@ -1,9 +1,8 @@
 package com.jlogm.impl;
 
 import com.jlogm.Logger;
-import com.jlogm.Registry;
+import com.jlogm.Registry.Builder;
 import com.jlogm.factory.LoggerFactory;
-import com.jlogm.fluent.LogOrigin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
@@ -16,9 +15,9 @@ import java.util.Objects;
 public final class Slf4jLoggerImpl implements org.slf4j.Logger, Serializable {
 
     private final @NotNull String name;
-    private final @NotNull LogOrigin origin;
+    private final @NotNull StackTraceElement origin;
 
-    public Slf4jLoggerImpl(@NotNull String name, @NotNull LogOrigin origin) {
+    public Slf4jLoggerImpl(@NotNull String name, @NotNull StackTraceElement origin) {
         this.name = name;
         this.origin = origin;
     }
@@ -29,7 +28,7 @@ public final class Slf4jLoggerImpl implements org.slf4j.Logger, Serializable {
     public @NotNull String getName() {
         return name;
     }
-    public @NotNull LogOrigin getOrigin() {
+    public @NotNull StackTraceElement getOrigin() {
         return origin;
     }
     public @NotNull String getFullyQualifiedCallerName() {
@@ -288,29 +287,24 @@ public final class Slf4jLoggerImpl implements org.slf4j.Logger, Serializable {
         handle(Level.ERROR, marker, msg, new Object[0], t);
     }
 
-    private void handle(@NotNull("logging level cannot be null!") Level level, @Nullable Marker marker, @Nullable String messagePattern, @Nullable Object @Nullable [] arguments, @Nullable Throwable throwable) {
+    private void handle(@NotNull Level level, @Nullable Marker marker, @Nullable String messagePattern, @Nullable Object @Nullable [] arguments, @Nullable Throwable throwable) {
         @NotNull LoggerFactory factory = LoggerFactory.getInstance();
 
         // Get the current jlogm level
-        com.jlogm.Level jlogmlevel = factory.getLevels().get(level.name()).orElse(null);
-        if (level == Level.ERROR) jlogmlevel = factory.getLevels().get("SEVERE").orElse(null);
-
-        if (jlogmlevel == null) {
-            throw new IllegalArgumentException("the currently jlogm factory doesn't supports the SLF4J '" + level.name() + "' level");
-        }
+        @NotNull com.jlogm.Level jlogmlevel = level == Level.ERROR ? com.jlogm.Level.SEVERE : com.jlogm.Level.valueOf(level.name());
 
         // Message
         @NotNull String message = MessageFormatter.basicArrayFormat(messagePattern, arguments);
 
         // Prepare the logger
         @NotNull Logger logger = factory.create(getName());
-        @NotNull Registry registry = logger.registry(jlogmlevel);
+        @NotNull Builder builder = logger.registry(jlogmlevel);
 
         // Exceptions
-        if (throwable != null) registry.withCause(throwable);
+        if (throwable != null) builder.cause(throwable);
 
         // Perform
-        registry.log(message);
+        builder.log(message);
     }
 
     // Modules

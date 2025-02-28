@@ -4,7 +4,6 @@ import com.jlogm.Filter;
 import com.jlogm.Level;
 import com.jlogm.Logger;
 import com.jlogm.factory.LoggerFactory;
-import com.jlogm.fluent.LogOrigin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.ILoggerFactory;
@@ -81,9 +80,7 @@ public final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
     @Override
     public @NotNull org.slf4j.Logger getLogger(@NotNull String name) {
         @NotNull StackTraceElement element = Arrays.stream(Thread.currentThread().getStackTrace()).skip(3).findFirst().orElseThrow(IllegalStateException::new);
-        @NotNull LogOrigin origin = LogOrigin.create(element.getClassName(), element.getFileName(), element.getMethodName(), element.getLineNumber());
-
-        return new Slf4jLoggerImpl(name, origin);
+        return new Slf4jLoggerImpl(name, element);
     }
 
     // Implementations

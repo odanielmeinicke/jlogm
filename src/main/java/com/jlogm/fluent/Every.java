@@ -3,7 +3,6 @@ package com.jlogm.fluent;
 import com.jlogm.Registry;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.factory.LoggerFactory.Registries;
-import com.jlogm.impl.RegistryImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -18,7 +17,7 @@ public interface Every {
     // Static initializers
 
     static @NotNull Every period(@NotNull Duration duration) {
-        return (factory, registry) -> {
+        return (factory, registry, object) -> {
             @Nullable Registries registries = factory.getRegistries();
             if (registries == null) {
                 throw new UnsupportedOperationException("the 'times' every function can only be used on logger factories with registries");
@@ -28,13 +27,8 @@ public interface Every {
                     .filter(second -> !second.isSuppressed())
                     .filter(second -> Arrays.equals(second.getMarkers(), registry.getMarkers()))
                     .filter(second -> second.getLevel().equals(registry.getLevel()))
-                    .filter(second -> {
-                        if ((second instanceof RegistryImpl && registry instanceof RegistryImpl)) {
-                            return Objects.equals(((RegistryImpl) second).getObject(), ((RegistryImpl) registry).getObject());
-                        }
-                        return false;
-                    })
-                    .filter(second -> second.getOrigin().equals(registry.getOrigin()))
+                    .filter(second -> Objects.equals(second.getObject(), object))
+                    .filter(second -> Objects.equals(second.getOrigin(), registry.getOrigin()))
                     .reduce((first, second) -> second)
                     .orElse(null);
 
@@ -42,7 +36,7 @@ public interface Every {
         };
     }
     static @NotNull Every times(@Range(from = 0, to = Integer.MAX_VALUE) int number) {
-        return (factory, registry) -> {
+        return (factory, registry, object) -> {
             @Nullable Registries registries = factory.getRegistries();
             if (registries == null) {
                 throw new UnsupportedOperationException("the 'times' every function can only be used on logger factories with registries");
@@ -51,13 +45,8 @@ public interface Every {
             long count = registries.stream()
                     .filter(second -> Arrays.equals(second.getMarkers(), registry.getMarkers()))
                     .filter(second -> second.getLevel().equals(registry.getLevel()))
-                    .filter(second -> {
-                        if ((second instanceof RegistryImpl && registry instanceof RegistryImpl)) {
-                            return Objects.equals(((RegistryImpl) second).getObject(), ((RegistryImpl) registry).getObject());
-                        }
-                        return false;
-                    })
-                    .filter(second -> second.getOrigin().equals(registry.getOrigin()))
+                    .filter(second -> Objects.equals(second.getObject(), object))
+                    .filter(second -> Objects.equals(second.getOrigin(), registry.getOrigin()))
                     .count();
 
             return (count != 0 && (count - 1) % (number + 1) != 0);
@@ -66,6 +55,6 @@ public interface Every {
 
     // Object
 
-    boolean canLog(@NotNull LoggerFactory factory, @NotNull Registry registry);
+    boolean canLog(@NotNull LoggerFactory factory, @NotNull Registry.Builder builder, @Nullable Object object);
 
 }

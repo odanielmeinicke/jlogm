@@ -1,67 +1,79 @@
 package com.jlogm;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A Level is an indicator of the log type. It is used to categorize the logs,
  * allowing for filtering and differentiated formatting. Each log message is associated
  * with a level, which corresponds to the severity of the log.
+ *
+ * <p>This enum defines a set of standard logging levels with default values.
+ * The levels provided are:</p>
+ * <ul>
+ *   <li>{@code TRACE} - Detailed tracing messages for in-depth debugging.</li>
+ *   <li>{@code INFO} - Informational messages that highlight the progress of the application.</li>
+ *   <li>{@code SEVERE} - Indicates a serious failure or error condition.</li>
+ *   <li>{@code WARN} - Potentially harmful situations that are not immediately fatal.</li>
+ *   <li>{@code DEBUG} - Fine-grained messages used for debugging purposes.</li>
+ * </ul>
+ *
+ * <p>Each level has an inherent name which can be retrieved using the {@code getName()} method.
+ * The {@code toString()} method is overridden to return the uppercase name of the level,
+ * ensuring consistency in log outputs.</p>
  */
-public interface Level extends Serializable {
-
-    // Static initializers
-
-    @NotNull Level TRACE  = create("TRACE");
-    @NotNull Level INFO = create("INFO");
-    @NotNull Level SEVERE = create("SEVERE");
-    @NotNull Level WARN = create("WARN");
-    @NotNull Level DEBUG = create("DEBUG");
-
-    static @NotNull Level create(final @NotNull String name) {
-        return new Level() {
-
-            // Getters
-
-            @Override
-            public @NotNull String getName() {
-                return name;
-            }
-
-            // Implementations
-
-            @Override
-            public boolean equals(@Nullable Object object) {
-                if (this == object) return true;
-                if (object == null || getClass() != object.getClass()) return false;
-                @NotNull Level that = (Level) object;
-                return Objects.equals(getName(), that.getName());
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(getName());
-            }
-
-            @Override
-            public @NotNull String toString() {
-                return getName().toUpperCase();
-            }
-
-        };
-    }
-
-    // Object
+public enum Level {
 
     /**
-     * Returns the name/identifier of the level. This is how the level will be displayed
-     * in the console. The name is typically a standard designation such as "INFO", "DEBUG",
-     * "WARN", or "ERROR".
-     * @return The name of the level.
+     * Trace level logging. Intended for very fine-grained and detailed tracing messages.
      */
-    @NotNull String getName();
+    TRACE,
+
+    /**
+     * Info level logging. Used for informational messages that communicate the general progress of the application.
+     */
+    INFO,
+
+    /**
+     * Severe level logging. Represents serious error conditions that may prevent the application from continuing.
+     */
+    SEVERE,
+
+    /**
+     * Warning level logging. Used for potentially harmful situations that should be noted but do not necessarily
+     * require immediate intervention.
+     */
+    WARN,
+
+    /**
+     * Debug level logging. Provides detailed diagnostic information useful during development and debugging.
+     */
+    DEBUG;
+
+    // Getters
+
+    /**
+     * Returns the name/identifier of the log level.
+     * This method provides the standard designation of the level as a String.
+     * For example, calling {@code getName()} on {@link Level#INFO} returns {@code "INFO"}.
+     *
+     * @return a non-null String representing the name of the level.
+     */
+    @NotNull
+    public String getName() {
+        return name();
+    }
+
+    // Implementations
+
+    /**
+     * Returns a string representation of the log level.
+     * The returned value is the uppercase name of the level, ensuring consistency in log output.
+     *
+     * @return a non-null uppercase String representation of the level.
+     */
+    @Override
+    public String toString() {
+        return name();
+    }
 
 }

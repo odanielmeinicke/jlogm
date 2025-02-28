@@ -76,7 +76,7 @@ public final class DefaultFormatter implements Formatter {
     // Object
 
     @Override
-    public @NotNull String format(@NotNull Registry registry, @Nullable Object object) {
+    public @NotNull String format(@NotNull Registry registry) {
         // Message
         @NotNull StringBuilder content = new StringBuilder();
 
@@ -93,6 +93,8 @@ public final class DefaultFormatter implements Formatter {
         };
 
         // Content
+        @Nullable Object object = registry.getObject();
+
         if (object != null) {
             @NotNull String[] parts = object.toString().replace("\r", "").split(" ", -1);
 
@@ -182,7 +184,7 @@ public final class DefaultFormatter implements Formatter {
 
         {
             @Nullable Color color = LoggerFactoryImpl.getColor(registry.getLevel());
-            @NotNull Coloured coloured = Coloured.of(registry.getLevel().getName());
+            @NotNull Coloured coloured = Coloured.of(registry.getLevel().toString());
             if (color != null) coloured.color(color);
 
             level = coloured.print();

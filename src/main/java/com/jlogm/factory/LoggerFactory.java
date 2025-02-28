@@ -83,7 +83,7 @@ public interface LoggerFactory {
          * @return An Optional containing the level if found, or an empty Optional if not found.
          */
         default @NotNull Optional<Level> get(@NotNull String name) {
-            return stream().filter(level -> level.getName().equalsIgnoreCase(name)).findFirst();
+            return stream().filter(level -> level.toString().equalsIgnoreCase(name)).findFirst();
         }
 
         /**
@@ -100,13 +100,13 @@ public interface LoggerFactory {
     interface Filters extends Iterable<Filter> {
 
         /**
-         * Checks if a registry with the passed object is suppressed by any of the filters.
+         * Checks if a registry builder with the passed object is suppressed by any of the filters.
          *
          * @param registry The registry to check.
          * @param object The object to check.
          * @return True if the registry is suppressed, otherwise false.
          */
-        default boolean isSuppressed(@NotNull Registry registry, @Nullable Object object) {
+        default boolean isSuppressed(@NotNull Registry.Builder registry, @Nullable Object object) {
             return stream().anyMatch(filter -> filter.isSuppressed(registry, object));
         }
 

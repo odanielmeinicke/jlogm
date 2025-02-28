@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 @FunctionalInterface
 public interface Formatter {
-    @NotNull String format(@NotNull Registry registry, @Nullable Object object);
+    @NotNull String format(@NotNull Registry registry);
 
     default @NotNull Charset getCharset() {
         return StandardCharsets.UTF_8;

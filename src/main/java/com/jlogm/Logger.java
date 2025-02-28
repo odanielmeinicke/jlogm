@@ -1,5 +1,6 @@
 package com.jlogm;
 
+import com.jlogm.Registry.Builder;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.fluent.Every;
 import com.jlogm.fluent.StackFilter;
@@ -46,51 +47,41 @@ public interface Logger {
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);
     @NotNull StackFilter @NotNull [] getStackFilters();
 
-    @NotNull Logger consumer(@NotNull Consumer<Registry> registry);
-    @NotNull Consumer<Registry> @NotNull [] getConsumers();
+    @NotNull Logger consumer(@NotNull Consumer<Builder> registry);
+    @NotNull Consumer<Builder> @NotNull [] getConsumers();
 
-    @NotNull Registry registry(@NotNull Level level);
+    @NotNull Builder registry(@NotNull Level level);
 
-    default @NotNull Registry warn() {
-        @NotNull String name = "WARN";
-        @NotNull Level level = LoggerFactory.getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("there's no '" + name + "' level at the current logging factory"));
-        return registry(level);
+    default @NotNull Builder warn() {
+        return registry(Level.WARN);
     }
     default void warn(@Nullable String message) {
         warn().log(message);
     }
 
-    default @NotNull Registry severe() {
-        @NotNull String name = "SEVERE";
-        @NotNull Level level = LoggerFactory.getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("there's no '" + name + "' level at the current logging factory"));
-        return registry(level);
+    default @NotNull Builder severe() {
+        return registry(Level.SEVERE);
     }
     default void severe(@Nullable String message) {
         severe().log(message);
     }
 
-    default @NotNull Registry trace() {
-        @NotNull String name = "TRACE";
-        @NotNull Level level = LoggerFactory.getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("there's no '" + name + "' level at the current logging factory"));
-        return registry(level);
+    default @NotNull Builder trace() {
+        return registry(Level.TRACE);
     }
     default void trace(@Nullable String message) {
         trace().log(message);
     }
 
-    default @NotNull Registry debug() {
-        @NotNull String name = "DEBUG";
-        @NotNull Level level = LoggerFactory.getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("there's no '" + name + "' level at the current logging factory"));
-        return registry(level);
+    default @NotNull Builder debug() {
+        return registry(Level.DEBUG);
     }
     default void debug(@Nullable String message) {
         debug().log(message);
     }
 
-    default @NotNull Registry info() {
-        @NotNull String name = "INFO";
-        @NotNull Level level = LoggerFactory.getInstance().getLevels().get(name).orElseThrow(() -> new NullPointerException("there's no '" + name + "' level at the current logging factory"));
-        return registry(level);
+    default @NotNull Builder info() {
+        return registry(Level.INFO);
     }
     default void info(@Nullable String message) {
         info().log(message);

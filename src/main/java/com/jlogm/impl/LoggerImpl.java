@@ -34,6 +34,9 @@ final class LoggerImpl implements Logger {
 
     private @UnknownNullability Every every;
 
+    private @NotNull String suffix = "\n";
+    private @NotNull String prefix = "- ";
+
     LoggerImpl(@NotNull String name) {
         this.name = name;
     }
@@ -46,12 +49,12 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Logger every(@NotNull Every every) {
+    public @NotNull Logger getEvery(@NotNull Every every) {
         this.every = every;
         return this;
     }
     @Override
-    public @NotNull Every every() {
+    public @NotNull Every getEvery() {
         return every;
     }
 
@@ -104,6 +107,26 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
+    public @NotNull Logger prefix(@NotNull String prefix) {
+        this.prefix = prefix;
+        return this;
+    }
+    @Override
+    public @NotNull String getPrefix() {
+        return prefix;
+    }
+
+    @Override
+    public @NotNull Logger suffix(@NotNull String suffix) {
+        this.suffix = suffix;
+        return this;
+    }
+    @Override
+    public @NotNull String getSuffix() {
+        return suffix;
+    }
+
+    @Override
     public @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters) {
         this.stackFilters.clear();
         this.stackFilters.addAll(Arrays.asList(stackFilters));
@@ -136,7 +159,7 @@ final class LoggerImpl implements Logger {
     @Override
     public @NotNull Builder registry(@NotNull Level level) {
         // Generate registry
-        @NotNull Builder registry = new RegistryImpl.BuilderImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), every());
+        @NotNull Builder registry = new RegistryImpl.BuilderImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), getEvery(), getPrefix(), getSuffix());
 
         // Call consumers
         for (@NotNull Consumer<Builder> consumer : consumers) {

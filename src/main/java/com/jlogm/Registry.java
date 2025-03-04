@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
@@ -68,6 +69,8 @@ public interface Registry {
         @NotNull StackFilter @NotNull [] getStackFilters();
 
         @NotNull Builder marker(@NotNull Marker marker);
+        @NotNull Builder marker(@NotNull String name);
+        @NotNull Builder marker(@NotNull String name, @NotNull Color color);
         @NotNull Builder markers(@NotNull Marker @NotNull ... markers);
         @NotNull Marker @NotNull [] getMarkers();
 

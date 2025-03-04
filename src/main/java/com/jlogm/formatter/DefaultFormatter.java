@@ -84,7 +84,7 @@ public final class DefaultFormatter implements Formatter {
             @NotNull Pattern pattern = Pattern.compile("^(http(s?)://)?(((www\\.)?[a-zA-Z0-9.\\-_]+(\\.[a-zA-Z]{2,3})+)|(\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b))(/[a-zA-Z0-9_\\-\\s./?%#&=]*)?$");
             return pattern.matcher(string).find();
         };
-        @NotNull Function<StackTraceElement[], StackTraceElement[]> traceFilter = elements -> {
+        @NotNull Function<StackTraceElement[], StackTraceElement[]> stackFilter = elements -> {
             for (@NotNull StackFilter filter : registry.getStackFilters()) {
                 elements = filter.format(elements);
             }
@@ -119,7 +119,7 @@ public final class DefaultFormatter implements Formatter {
             }
         }
         if (registry.getCause() != null) {
-            @NotNull StackTraceElement[] traces = traceFilter.apply(registry.getCause().getStackTrace());
+            @NotNull StackTraceElement[] traces = stackFilter.apply(registry.getCause().getStackTrace());
 
             if (object != null) {
                 content.append(System.lineSeparator());
@@ -135,7 +135,7 @@ public final class DefaultFormatter implements Formatter {
 
             @Nullable Throwable recurring = registry.getCause().getCause();
             while (recurring != null) {
-                traces = traceFilter.apply(recurring.getStackTrace());
+                traces = stackFilter.apply(recurring.getStackTrace());
 
                 content.append(System.lineSeparator());
 

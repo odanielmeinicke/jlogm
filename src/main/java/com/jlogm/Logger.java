@@ -28,8 +28,8 @@ public interface Logger {
 
     @NotNull String getName();
 
-    @NotNull Logger every(@NotNull Every every);
-    @NotNull Every every();
+    @NotNull Logger getEvery(@NotNull Every every);
+    @NotNull Every getEvery();
 
     @NotNull Logger marker(@NotNull Marker marker);
     @NotNull Logger marker(@NotNull String name);
@@ -42,6 +42,11 @@ public interface Logger {
 
     @NotNull Logger formatter(@NotNull Formatter formatter);
     @NotNull Formatter getFormatter();
+
+    @NotNull Logger prefix(@NotNull String prefix);
+    @NotNull String getPrefix();
+    @NotNull Logger suffix(@NotNull String suffix);
+    @NotNull String getSuffix();
 
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);

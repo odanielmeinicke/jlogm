@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.OffsetDateTime;
@@ -148,14 +149,14 @@ public final class RegistryImpl implements Registry {
         private transient @Nullable Every every;
         private @Nullable StackTraceElement origin;
 
-        private @NotNull String suffix = "\n";
-        private @NotNull String prefix = "- ";
+        private @NotNull String suffix;
+        private @NotNull String prefix;
 
         private @NotNull Formatter formatter;
 
         private boolean suppressed = false;
 
-        BuilderImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull Formatter formatter, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every) {
+        BuilderImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull Formatter formatter, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every, @NotNull String prefix, @NotNull String suffix) {
             this.level = level;
             this.output = output;
             this.formatter = formatter;
@@ -164,6 +165,8 @@ public final class RegistryImpl implements Registry {
             this.markers = new LinkedHashSet<>(Arrays.asList(markers));
             this.every = every;
             this.origin = Arrays.stream(Thread.currentThread().getStackTrace()).skip(1).filter(trace -> !trace.getClassName().startsWith("com.jlogm")).findFirst().orElseThrow(IllegalStateException::new);
+            this.prefix = prefix;
+            this.suffix = suffix;
         }
 
         // Getters
@@ -277,6 +280,17 @@ public final class RegistryImpl implements Registry {
             this.markers.add(marker);
             return this;
         }
+        @Override
+        public @NotNull Builder marker(@NotNull String name) {
+            this.markers.add(new SimpleMarker(name));
+            return this;
+        }
+        @Override
+        public @NotNull Builder marker(@NotNull String name, @NotNull Color color) {
+            this.markers.add(new SimpleMarker(name, color));
+            return this;
+        }
+
         @Override
         public @NotNull Builder markers(@NotNull Marker @NotNull ... markers) {
             this.markers.clear();

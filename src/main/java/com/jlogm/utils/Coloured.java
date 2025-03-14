@@ -333,4 +333,12 @@ public final class Coloured {
     public void print(@NotNull OutputStream stream) throws IOException {
         stream.write(print().getBytes());
     }
+
+    // Implementations
+
+    @Override
+    public @NotNull String toString() {
+        return print();
+    }
+
 }

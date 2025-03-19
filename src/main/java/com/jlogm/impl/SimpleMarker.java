@@ -86,7 +86,7 @@ public final class SimpleMarker implements Marker {
 
     @Override
     public @NotNull String toString() {
-        return (getColor() != null ? Coloured.of(getName()).color(getColor()).print() : "");
+        return (getColor() != null ? Coloured.of(getName()).color(getColor()).print() : getName());
     }
 
 }

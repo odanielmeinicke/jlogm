@@ -46,6 +46,19 @@ public final class Coloured {
     // =========================================================================
 
     /**
+     * Removes all ANSI escape sequences from the given text.
+     *
+     * <p>This method strips out ANSI escape codes used for text styling (such as colors, bold, italic, underline,
+     * strikethrough, and reset codes), leaving only the plain text.
+     *
+     * @param text the input text containing ANSI escape sequences; must not be {@code null}.
+     * @return a {@code String} with all ANSI escape sequences removed.
+     */
+    public static @NotNull String sanitize(@NotNull String text) {
+        return text.replaceAll("\u001B\\[[;\\d]*m", "");
+    }
+
+    /**
      * Creates a new {@code Coloured} instance with the specified text.
      *
      * <p>This static factory method accepts a {@code String} and wraps it as the content to be styled.

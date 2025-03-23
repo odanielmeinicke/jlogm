@@ -20,20 +20,21 @@ import java.util.regex.Pattern;
 
 public final class DefaultFormatter implements Formatter {
 
-    // Static initializers
+    // Object
 
-    private static final @NotNull Map<String, Color> binds = new HashMap<String, Color>() {{
+    private final @NotNull Map<String, Color> binds = new HashMap<String, Color>() {{
         put("loading", new Color(0, 180, 255));
         put("initializing", new Color(0, 180, 255));
         put("generating", new Color(0, 180, 255));
         put("saving", new Color(0, 180, 255));
         put("enabling", new Color(0, 180, 255));
-        put("uploading", new Color(0, 180, 255));
         put("importing", new Color(0, 180, 255));
         put("localhost", new Color(0, 180, 255));
         put("127.0.0.1", new Color(0, 180, 255));
         put("running", new Color(0, 180, 255));
         put("loaded", new Color(0, 180, 255));
+        put("uploading", new Color(0, 180, 255));
+        put("downloading", new Color(0, 180, 255));
 
         put("successfully", new Color(0, 180, 0));
         put("connected", new Color(0, 180, 0));
@@ -42,9 +43,10 @@ public final class DefaultFormatter implements Formatter {
         put("saved", new Color(0, 180, 0));
         put("enabled", new Color(0, 180, 0));
         put("unloaded", new Color(0, 180, 0));
-        put("uploaded", new Color(0, 180, 0));
         put("imported", new Color(0, 180, 0));
         put("done", new Color(0, 180, 0));
+        put("uploaded", new Color(0, 180, 0));
+        put("downloaded", new Color(0, 180, 0));
 
         put("warning", new Color(0xFFE300));
 
@@ -69,11 +71,13 @@ public final class DefaultFormatter implements Formatter {
         put("interrupted", new Color(220, 0, 0));
     }};
 
-    public static @NotNull Map<String, Color> getBinds() {
+    // Getters
+
+    public @NotNull Map<String, Color> getBinds() {
         return binds;
     }
 
-    // Object
+    // Modules
 
     @Override
     public @NotNull String format(@NotNull Registry registry) {
@@ -175,8 +179,10 @@ public final class DefaultFormatter implements Formatter {
         @Nullable String source = null;
 
         if (registry.getOrigin() != null) {
-            @NotNull String[] sources = registry.getOrigin().getClassName().split("\\.");
-            source = sources[sources.length - 1] + (registry.getOrigin().getLineNumber() >= 0 ? ":" + registry.getOrigin().getLineNumber() : "");
+            @NotNull StackTraceElement origin = registry.getOrigin();
+
+            @NotNull String[] sources = origin.getClassName().split("\\.");
+            source = sources[sources.length - 1].split("\\$", 2)[0] + (origin.getLineNumber() >= 0 ? (":" + origin.getLineNumber()) : "");
         }
 
         // Colors

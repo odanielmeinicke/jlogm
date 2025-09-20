@@ -172,7 +172,7 @@ public final class DefaultFormatter implements Formatter {
 
         // Date
         @NotNull SimpleDateFormat format = new SimpleDateFormat("yy-dd-MM HH:mm:ss.S");
-        @NotNull String date = format.format(new Date(registry.getDate().toInstant().toEpochMilli()));
+        @NotNull String date = format.format(new Date(registry.getInstant().toEpochMilli()));
         date = String.format("%-" + 21 + "s", date);
 
         // Source

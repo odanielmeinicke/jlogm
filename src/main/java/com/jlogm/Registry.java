@@ -8,19 +8,27 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Marker;
 
 import java.awt.*;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static com.jlogm.JsonUtils.escapeJson;
 
 public interface Registry {
 
+    @NotNull Map<String, Object> getContext();
+    @NotNull Set<String> getStack();
+
     @NotNull Level getLevel();
-    @NotNull OffsetDateTime getDate();
+    @NotNull Instant getInstant();
 
     @Nullable Every getEvery();
     @Nullable StackTraceElement getOrigin();
 
-    @NotNull String getPrefix();
-    @NotNull String getSuffix();
+    @Nullable String getPrefix();
+    @Nullable String getSuffix();
 
     @NotNull Formatter getFormatter();
     @Nullable Throwable getCause();
@@ -35,14 +43,117 @@ public interface Registry {
     @Override
     @NotNull String toString();
 
+    default @NotNull String toJson() {
+        @NotNull StringBuilder builder = new StringBuilder("{");
+        builder.append("\"level\":\"").append(escapeJson(getLevel().getName())).append("\",");
+        builder.append("\"date\":").append(getInstant().toEpochMilli()).append(",");
+
+        if (getOrigin() != null) {
+            builder.append("\"origin\":\"").append(escapeJson(getOrigin().toString())).append("\",");
+        } if (getPrefix() != null) {
+            builder.append("\"prefix\":\"").append(escapeJson(getPrefix())).append("\",");
+        } if (getSuffix() != null) {
+            builder.append("\"suffix\":\"").append(escapeJson(getSuffix())).append("\",");
+        }
+
+        // Serialize cause
+        if (getCause() != null) {
+            builder.append("\"causes\":[");
+
+            @NotNull Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+            @Nullable Throwable curr = getCause();
+
+            while (curr != null && seen.add(curr)) {
+                builder.append("{");
+
+                // Type
+                builder.append("\"type\":\"").append(escapeJson(curr.getClass().getName())).append("\",");
+
+                // Message
+                if (curr.getMessage() == null) {
+                    builder.append("\"message\":null,");
+                } else {
+                    builder.append("\"message\":\"").append(escapeJson(curr.getMessage())).append("\",");
+                }
+
+                // Stack trace as json array
+                builder.append("\"stackTrace\":[");
+
+                @NotNull StackTraceElement[] st = curr.getStackTrace();
+                for (@NotNull StackTraceElement e : st) {
+                    builder.append("\"").append(escapeJson(e.toString())).append("\",");
+                }
+
+                if (st.length > 0) builder.setLength(builder.length() - 1); // Removes last comma
+                builder.append("]");
+
+                builder.append("},");
+                curr = curr.getCause();
+            }
+
+            // Removes last comma if exists
+            if (builder.charAt(builder.length() - 1) == ',') {
+                builder.setLength(builder.length() - 1);
+            }
+
+            // Finish
+            builder.append("],");
+        }
+
+        // Context
+        if (!getContext().isEmpty()) {
+            builder.append("\"context\":{");
+
+            boolean first = true;
+            for (@NotNull Map.Entry<String, Object> entry : getContext().entrySet()) {
+                @NotNull String key = escapeJson(entry.getKey());
+                @NotNull String value = (entry.getValue() != null ? "\"" + escapeJson(entry.getValue().toString()) + "\"" : "null");
+
+                if (!first) builder.append(",");
+                builder.append("\"").append(key).append("\":").append(value);
+                first = false;
+            }
+
+            // Finish
+            builder.append("},");
+        }
+
+        // Stack
+        if (!getStack().isEmpty()) {
+            builder.append("\"stack\":[");
+
+            boolean first = true;
+            for (@NotNull String stack : getStack()) {
+                if (!first) builder.append(",");
+                builder.append("\"").append(escapeJson(stack)).append("\"");
+                first = false;
+            }
+
+            // Finish
+            builder.append("],");
+        }
+
+        // Message
+        if (getObject() != null) {
+            builder.append("\"object\":\"").append(escapeJson(String.valueOf(getObject()))).append("\"");
+        } else {
+            builder.append("\"object\":null");
+        }
+
+        builder.append("}");
+
+        // Finish
+        return builder.toString();
+    }
+
     // Classes
 
     interface Builder {
         @NotNull Builder level(@NotNull Level level);
         @NotNull Level getLevel();
 
-        @NotNull Builder date(@NotNull OffsetDateTime date);
-        @NotNull OffsetDateTime getDate();
+        @NotNull Builder instant(@NotNull Instant instant);
+        @NotNull Instant getInstant();
 
         @NotNull Builder origin(@Nullable StackTraceElement origin);
         @Nullable StackTraceElement getOrigin();
@@ -50,11 +161,11 @@ public interface Registry {
         @NotNull Builder every(@NotNull Every every);
         @Nullable Every getEvery();
 
-        @NotNull Builder prefix(@NotNull String prefix);
-        @NotNull String getPrefix();
+        @NotNull Builder prefix(@Nullable String prefix);
+        @Nullable String getPrefix();
 
-        @NotNull Builder suffix(@NotNull String suffix);
-        @NotNull String getSuffix();
+        @NotNull Builder suffix(@Nullable String suffix);
+        @Nullable String getSuffix();
 
         @NotNull Builder formatter(@NotNull Formatter formatter);
         @NotNull Formatter getFormatter();

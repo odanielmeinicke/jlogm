@@ -3,6 +3,8 @@ package com.jlogm.impl;
 import com.jlogm.Filter;
 import com.jlogm.Level;
 import com.jlogm.Registry;
+import com.jlogm.context.LogCtx;
+import com.jlogm.context.Stack;
 import com.jlogm.factory.LoggerFactory;
 import com.jlogm.factory.LoggerFactory.Registries;
 import com.jlogm.fluent.Every;
@@ -15,21 +17,18 @@ import org.slf4j.Marker;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 
 public final class RegistryImpl implements Registry {
 
     private final @NotNull Level level;
-    private final @NotNull OffsetDateTime dateTime;
+    private final @NotNull Instant instant;
 
     private final @Nullable Every every;
     private final @Nullable StackTraceElement origin;
-    private final @NotNull String suffix;
-    private final @NotNull String prefix;
+    private final @Nullable String suffix;
+    private final @Nullable String prefix;
     private final @NotNull Formatter formatter;
     private final @Nullable Throwable cause;
     private final @NotNull Marker @NotNull [] markers;
@@ -37,9 +36,12 @@ public final class RegistryImpl implements Registry {
     private final @Nullable Object object;
     private final boolean suppressed;
 
-    public RegistryImpl(@NotNull Level level, @NotNull OffsetDateTime dateTime, @Nullable Every every, @Nullable StackTraceElement origin, @NotNull String suffix, @NotNull String prefix, @NotNull Formatter formatter, @Nullable Throwable cause, @NotNull Marker @NotNull [] markers, @NotNull StackFilter @NotNull [] stackFilters, @Nullable Object object, boolean suppressed) {
+    private final @NotNull Map<String, Object> context;
+    private final @NotNull Set<String> stack;
+
+    public RegistryImpl(@NotNull Level level, @NotNull Instant instant, @Nullable Every every, @Nullable StackTraceElement origin, @Nullable String suffix, @Nullable String prefix, @NotNull Formatter formatter, @Nullable Throwable cause, @NotNull Marker @NotNull [] markers, @NotNull StackFilter @NotNull [] stackFilters, @Nullable Object object, boolean suppressed, @NotNull Map<String, Object> context, @NotNull Set<String> stack) {
         this.level = level;
-        this.dateTime = dateTime;
+        this.instant = instant;
         this.every = every;
         this.origin = origin;
         this.suffix = suffix;
@@ -50,6 +52,8 @@ public final class RegistryImpl implements Registry {
         this.stackFilters = stackFilters;
         this.object = object;
         this.suppressed = suppressed;
+        this.context = context;
+        this.stack = stack;
     }
 
     // Getters
@@ -59,8 +63,8 @@ public final class RegistryImpl implements Registry {
         return level;
     }
     @Override
-    public @NotNull OffsetDateTime getDate() {
-        return dateTime;
+    public @NotNull Instant getInstant() {
+        return instant;
     }
 
     @Override
@@ -74,11 +78,11 @@ public final class RegistryImpl implements Registry {
     }
 
     @Override
-    public @NotNull String getPrefix() {
+    public @Nullable String getPrefix() {
         return prefix;
     }
     @Override
-    public @NotNull String getSuffix() {
+    public @Nullable String getSuffix() {
         return suffix;
     }
 
@@ -112,17 +116,26 @@ public final class RegistryImpl implements Registry {
         return suppressed;
     }
 
+    @Override
+    public @NotNull Map<String, Object> getContext() {
+        return context;
+    }
+    @Override
+    public @NotNull Set<String> getStack() {
+        return stack;
+    }
+
     // Implementations
 
     @Override
     public boolean equals(@Nullable Object object) {
         if (!(object instanceof RegistryImpl)) return false;
         @NotNull RegistryImpl registry = (RegistryImpl) object;
-        return isSuppressed() == registry.isSuppressed() && getLevel() == registry.getLevel() && Objects.equals(dateTime, registry.dateTime) && Objects.equals(getEvery(), registry.getEvery()) && Objects.equals(getOrigin(), registry.getOrigin()) && Objects.equals(getSuffix(), registry.getSuffix()) && Objects.equals(getPrefix(), registry.getPrefix()) && Objects.equals(getFormatter(), registry.getFormatter()) && Objects.equals(getCause(), registry.getCause()) && Objects.deepEquals(getMarkers(), registry.getMarkers()) && Objects.deepEquals(getStackFilters(), registry.getStackFilters()) && Objects.equals(getObject(), registry.getObject());
+        return isSuppressed() == registry.isSuppressed() && getLevel() == registry.getLevel() && Objects.equals(getInstant(), registry.getInstant()) && Objects.equals(getEvery(), registry.getEvery()) && Objects.equals(getOrigin(), registry.getOrigin()) && Objects.equals(getSuffix(), registry.getSuffix()) && Objects.equals(getPrefix(), registry.getPrefix()) && Objects.equals(getFormatter(), registry.getFormatter()) && Objects.equals(getCause(), registry.getCause()) && Objects.deepEquals(getMarkers(), registry.getMarkers()) && Objects.deepEquals(getStackFilters(), registry.getStackFilters()) && Objects.equals(getObject(), registry.getObject());
     }
     @Override
     public int hashCode() {
-        return Objects.hash(getLevel(), dateTime, getEvery(), getOrigin(), getSuffix(), getPrefix(), getFormatter(), getCause(), Arrays.hashCode(getMarkers()), Arrays.hashCode(getStackFilters()), getObject(), isSuppressed());
+        return Objects.hash(getLevel(), getInstant(), getEvery(), getOrigin(), getSuffix(), getPrefix(), getFormatter(), getCause(), Arrays.hashCode(getMarkers()), Arrays.hashCode(getStackFilters()), getObject(), isSuppressed());
     }
 
     @Override
@@ -139,7 +152,7 @@ public final class RegistryImpl implements Registry {
         private final @NotNull OutputStream output;
 
         private @NotNull Level level;
-        private @NotNull OffsetDateTime date;
+        private @NotNull Instant instant;
 
         private @Nullable Throwable cause;
 
@@ -149,18 +162,18 @@ public final class RegistryImpl implements Registry {
         private transient @Nullable Every every;
         private @Nullable StackTraceElement origin;
 
-        private @NotNull String suffix;
-        private @NotNull String prefix;
+        private @Nullable String suffix;
+        private @Nullable String prefix;
 
         private @NotNull Formatter formatter;
 
         private boolean suppressed = false;
 
-        BuilderImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull Formatter formatter, @NotNull OffsetDateTime date, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every, @NotNull String prefix, @NotNull String suffix) {
+        BuilderImpl(@NotNull Level level, @NotNull OutputStream output, @NotNull Formatter formatter, @NotNull Instant instant, @NotNull StackFilter @NotNull [] stackFilters, @NotNull Marker @NotNull [] markers, @Nullable Every every, @Nullable String prefix, @Nullable String suffix) {
             this.level = level;
             this.output = output;
             this.formatter = formatter;
-            this.date = date;
+            this.instant = instant;
             this.stackFilters = stackFilters;
             this.markers = new LinkedHashSet<>(Arrays.asList(markers));
             this.every = every;
@@ -182,13 +195,13 @@ public final class RegistryImpl implements Registry {
         }
 
         @Override
-        public @NotNull Builder date(@NotNull OffsetDateTime date) {
-            this.date = date;
+        public @NotNull Builder instant(@NotNull Instant instant) {
+            this.instant = instant;
             return this;
         }
         @Override
-        public @NotNull OffsetDateTime getDate() {
-            return date;
+        public @NotNull Instant getInstant() {
+            return instant;
         }
 
         @Override
@@ -220,22 +233,22 @@ public final class RegistryImpl implements Registry {
         }
 
         @Override
-        public @NotNull Builder prefix(@NotNull String prefix) {
+        public @NotNull Builder prefix(@Nullable String prefix) {
             this.prefix = prefix;
             return this;
         }
         @Override
-        public @NotNull String getPrefix() {
+        public @Nullable String getPrefix() {
             return prefix;
         }
 
         @Override
-        public @NotNull Builder suffix(@NotNull String suffix) {
+        public @NotNull Builder suffix(@Nullable String suffix) {
             this.suffix = suffix;
             return this;
         }
         @Override
-        public @NotNull String getSuffix() {
+        public @Nullable String getSuffix() {
             return suffix;
         }
 
@@ -319,8 +332,12 @@ public final class RegistryImpl implements Registry {
                 setSuppressed(true);
             }
 
+            // Clone context and stack
+            @NotNull Map<String, Object> context = new LinkedHashMap<>(LogCtx.snapshot());
+            @NotNull Set<String> stack = new LinkedHashSet<>(Stack.snapshot());
+
             // Generate registry
-            @NotNull RegistryImpl registry = new RegistryImpl(getLevel(), getDate(), getEvery(), getOrigin(), getSuffix(), getPrefix(), getFormatter(), getCause(), getMarkers(), getStackFilters(), object, isSuppressed());
+            @NotNull RegistryImpl registry = new RegistryImpl(getLevel(), getInstant(), getEvery(), getOrigin(), getSuffix(), getPrefix(), getFormatter(), getCause(), getMarkers(), getStackFilters(), object, isSuppressed(), context, stack);
             
             // Generate message
             @NotNull String message = getFormatter().format(registry);
@@ -351,7 +368,7 @@ public final class RegistryImpl implements Registry {
         public @NotNull String toString() {
             return "RegistryImpl{" +
                     "level=" + level +
-                    ", date=" + date +
+                    ", instant=" + instant +
                     ", throwable=" + cause +
                     ", stackFilters=" + Arrays.toString(stackFilters) +
                     ", markers=" + markers +

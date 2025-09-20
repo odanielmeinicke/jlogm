@@ -24,24 +24,15 @@ public class Slf4jServiceImpl implements SLF4JServiceProvider {
     // Getters
 
     @Override
-    public @NotNull ILoggerFactory getLoggerFactory() {
-        if (loggerFactory == null) {
-            throw new IllegalStateException("this service provider is not initialized");
-        }
+    public @Nullable ILoggerFactory getLoggerFactory() {
         return loggerFactory;
     }
     @Override
-    public @NotNull IMarkerFactory getMarkerFactory() {
-        if (markerFactory == null) {
-            throw new IllegalStateException("this service provider is not initialized");
-        }
+    public @Nullable IMarkerFactory getMarkerFactory() {
         return markerFactory;
     }
     @Override
-    public @NotNull MDCAdapter getMDCAdapter() {
-        if (mdcAdapter == null) {
-            throw new IllegalStateException("this service provider is not initialized");
-        }
+    public @Nullable MDCAdapter getMDCAdapter() {
         return mdcAdapter;
     }
 

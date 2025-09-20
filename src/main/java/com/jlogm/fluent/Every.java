@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ public interface Every {
                     .reduce((first, second) -> second)
                     .orElse(null);
 
-            return last == null || last.getDate().plus(duration).isBefore(OffsetDateTime.now());
+            return last == null || last.getInstant().plus(duration).isBefore(Instant.now());
         };
     }
     static @NotNull Every times(@Range(from = 0, to = Integer.MAX_VALUE) int number) {

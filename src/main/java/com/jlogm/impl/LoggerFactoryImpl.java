@@ -41,7 +41,7 @@ public final class LoggerFactoryImpl implements LoggerFactory, ILoggerFactory {
 
     private final @NotNull Levels levels = new LevelsImpl();
     private final @NotNull Filters filters = new FiltersImpl();
-    private @Nullable Registries registries = new RegistriesImpl();
+    private @Nullable Registries registries = null;
 
     LoggerFactoryImpl() {
     }

@@ -14,7 +14,7 @@ import org.slf4j.Marker;
 
 import java.awt.*;
 import java.io.OutputStream;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
@@ -34,8 +34,8 @@ final class LoggerImpl implements Logger {
 
     private @UnknownNullability Every every;
 
-    private @NotNull String suffix = "\n";
-    private @NotNull String prefix = "- ";
+    private @Nullable String suffix = "\n";
+    private @Nullable String prefix = "- ";
 
     LoggerImpl(@NotNull String name) {
         this.name = name;
@@ -107,22 +107,22 @@ final class LoggerImpl implements Logger {
     }
 
     @Override
-    public @NotNull Logger prefix(@NotNull String prefix) {
+    public @NotNull Logger prefix(@Nullable String prefix) {
         this.prefix = prefix;
         return this;
     }
     @Override
-    public @NotNull String getPrefix() {
+    public @Nullable String getPrefix() {
         return prefix;
     }
 
     @Override
-    public @NotNull Logger suffix(@NotNull String suffix) {
+    public @NotNull Logger suffix(@Nullable String suffix) {
         this.suffix = suffix;
         return this;
     }
     @Override
-    public @NotNull String getSuffix() {
+    public @Nullable String getSuffix() {
         return suffix;
     }
 
@@ -159,7 +159,8 @@ final class LoggerImpl implements Logger {
     @Override
     public @NotNull Builder registry(@NotNull Level level) {
         // Generate registry
-        @NotNull Builder registry = new RegistryImpl.BuilderImpl(level, getOutput(), getFormatter(), OffsetDateTime.now(), getStackFilters(), getMarkers(), getEvery(), getPrefix(), getSuffix());
+        long time = System.currentTimeMillis();
+        @NotNull Builder registry = new RegistryImpl.BuilderImpl(level, getOutput(), getFormatter(), Instant.ofEpochMilli(time), getStackFilters(), getMarkers(), getEvery(), getPrefix(), getSuffix());
 
         // Call consumers
         for (@NotNull Consumer<Builder> consumer : consumers) {

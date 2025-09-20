@@ -72,7 +72,7 @@ public enum Level {
      * @return a non-null uppercase String representation of the level.
      */
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return name();
     }
 

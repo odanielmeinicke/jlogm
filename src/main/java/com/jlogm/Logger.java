@@ -43,10 +43,10 @@ public interface Logger {
     @NotNull Logger formatter(@NotNull Formatter formatter);
     @NotNull Formatter getFormatter();
 
-    @NotNull Logger prefix(@NotNull String prefix);
-    @NotNull String getPrefix();
-    @NotNull Logger suffix(@NotNull String suffix);
-    @NotNull String getSuffix();
+    @NotNull Logger prefix(@Nullable String prefix);
+    @Nullable String getPrefix();
+    @NotNull Logger suffix(@Nullable String suffix);
+    @Nullable String getSuffix();
 
     @NotNull Logger stackFilters(@NotNull StackFilter @NotNull ... stackFilters);
     @NotNull Logger stackFilter(@NotNull StackFilter stackFilter);

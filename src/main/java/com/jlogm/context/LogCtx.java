@@ -72,12 +72,12 @@ public final class LogCtx {
      * Put a key/value pair into the current thread's context and return the LogCtx for chaining.
      *
      * @param key   non-null key
-     * @param value non-null value
+     * @param value nullable value
      * @return current LogCtx for fluent chaining
      * @throws NullPointerException if key or value is null
      */
     @NotNull
-    public static LogCtx put(@NotNull String key, @NotNull Object value) {
+    public static LogCtx put(@NotNull String key, @Nullable Object value) {
         @NotNull LogCtx ctx = CONTEXT.get();
         ctx.map.put(key, value);
         return ctx;
@@ -87,11 +87,11 @@ public final class LogCtx {
      * Put a key/value pair only if absent and return the LogCtx for chaining.
      *
      * @param key   non-null key
-     * @param value non-null value
+     * @param value nullable value
      * @return current LogCtx for chaining
      */
     @NotNull
-    public static LogCtx putIfAbsent(@NotNull String key, @NotNull Object value) {
+    public static LogCtx putIfAbsent(@NotNull String key, @Nullable Object value) {
         @NotNull LogCtx ctx = CONTEXT.get();
         ctx.map.putIfAbsent(key, value);
         return ctx;
@@ -171,7 +171,6 @@ public final class LogCtx {
      */
     @Nullable
     public static String getString(@NotNull String key) {
-        Objects.requireNonNull(key, "key");
         Object v = CONTEXT.get().map.get(key);
         return v == null ? null : v.toString();
     }
@@ -184,7 +183,6 @@ public final class LogCtx {
      */
     @Nullable
     public static Object get(@NotNull String key) {
-        Objects.requireNonNull(key, "key");
         return CONTEXT.get().map.get(key);
     }
 
@@ -204,7 +202,6 @@ public final class LogCtx {
      * @return true if present
      */
     public static boolean containsKey(@NotNull String key) {
-        Objects.requireNonNull(key, "key");
         return CONTEXT.get().map.containsKey(key);
     }
 
@@ -253,11 +250,11 @@ public final class LogCtx {
      * <pre>{@code try (LogCtx.Scope s = LogCtx.with("requestId", "r1")) { ... } }</pre>
      *
      * @param key   non-null key
-     * @param value non-null value
+     * @param value nullable value
      * @return Scope that will restore previous state when closed
      */
     @NotNull
-    public static Scope with(@NotNull String key, @NotNull Object value) {
+    public static Scope with(@NotNull String key, @Nullable Object value) {
         return builder().put(key, value).install();
     }
 
@@ -273,13 +270,11 @@ public final class LogCtx {
          * Add a key/value pair to the builder.
          *
          * @param key   non-null key
-         * @param value non-null value
+         * @param value nullable value
          * @return this builder for chaining
          */
         @NotNull
-        public Builder put(@NotNull String key, @NotNull Object value) {
-            Objects.requireNonNull(key, "key");
-            Objects.requireNonNull(value, "value");
+        public Builder put(@NotNull String key, @Nullable Object value) {
             values.put(key, value);
             return this;
         }
@@ -292,7 +287,6 @@ public final class LogCtx {
          */
         @NotNull
         public Builder putAll(@NotNull Map<String, Object> m) {
-            Objects.requireNonNull(m, "map");
             values.putAll(m);
             return this;
         }
@@ -405,13 +399,10 @@ public final class LogCtx {
      * Instance-level put used by the fluent static {@link #put(String, Object)}.
      *
      * @param key non-null key
-     * @param value non-null value
+     * @param value nullable value
      * @return this instance for chaining
      */
-    @NotNull
-    private LogCtx putInternal(@NotNull String key, @NotNull Object value) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(value, "value");
+    private @NotNull LogCtx putInternal(@NotNull String key, @Nullable Object value) {
         this.map.put(key, value);
         return this;
     }
@@ -421,8 +412,7 @@ public final class LogCtx {
      *
      * @return snapshot map
      */
-    @NotNull
-    private Map<String, Object> snapshotInternal() {
+    private @NotNull Map<String, Object> snapshotInternal() {
         return Collections.unmodifiableMap(new LinkedHashMap<>(this.map));
     }
 
@@ -437,8 +427,7 @@ public final class LogCtx {
      * @param <T>      result type
      * @return supplier result
      */
-    @NotNull
-    public static <T> T runWithContext(@NotNull Supplier<T> supplier) {
+    public static <T> @NotNull T runWithContext(@NotNull Supplier<T> supplier) {
         Objects.requireNonNull(supplier, "supplier");
         Map<String, Object> snap = snapshot();
         try (Scope s = new Scope(snap)) {

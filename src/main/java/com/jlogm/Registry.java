@@ -9,10 +9,8 @@ import org.slf4j.Marker;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 import static com.jlogm.JsonUtils.escapeJson;
 
@@ -120,10 +118,15 @@ public interface Registry {
 
         // Stack
         if (!getStack().isEmpty()) {
+            // Reverse stack collection
+            @NotNull List<String> stackSet = new LinkedList<>(getStack());
+            Collections.reverse(stackSet);
+
+            // Serialize it
             builder.append("\"stack\":[");
 
             boolean first = true;
-            for (@NotNull String stack : getStack()) {
+            for (@NotNull String stack : stackSet) {
                 if (!first) builder.append(",");
                 builder.append("\"").append(escapeJson(stack)).append("\"");
                 first = false;
